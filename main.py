@@ -72,7 +72,7 @@ class Aplicacion:
             self.motor.personaje = ent_personaje.get()
             self.motor.taller = ent_taller.get()
             if self.motor.personaje and self.motor.taller:
-                self.db.guardar(self.motor) # Guardamos en SQLite
+                self.db.guardar(self.slot_actual, self.motor) 
                 self.mostrar_taller()
 
         ctk.CTkButton(self.root, text="¡ABRIR PUERTAS!", command=confirmar).grid(row=3, pady=30)
