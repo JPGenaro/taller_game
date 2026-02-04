@@ -3,6 +3,7 @@ from core.motor import MotorJuego
 from core.database import Database
 from modelos.auto import Auto
 from interfaz.componentes import SlotTaller
+from interfaz.mercado import VentanaMercado
 
 class Aplicacion:
     def __init__(self):
@@ -86,13 +87,13 @@ class Aplicacion:
         footer = ctk.CTkFrame(self.root, height=100)
         footer.pack(fill="x", padx=10, pady=10)
         
-        def comprar_algo():
-            # Esto es temporal para probar
-            nuevo = Auto("Fiat", "600", 500)
-            exito, msg = self.motor.comprar_auto(nuevo)
-            if exito: self.mostrar_taller()
+        def abrir_mercado():
+            # Pasamos self.motor para que el mercado pueda descontar plata
+            # y self.mostrar_taller para que se refresque la pantalla al cerrar
+            VentanaMercado(self.root, self.motor, self.mostrar_taller)
 
-        ctk.CTkButton(footer, text="🛒 BUSCAR AUTOS", command=comprar_algo, width=200, height=50).pack(side="left", padx=20)
+        ctk.CTkButton(footer, text="🛒 BUSCAR AUTOS", command=abrir_mercado, 
+              width=250, height=50).pack(side="left", padx=20)
 
 if __name__ == "__main__":
     Aplicacion()

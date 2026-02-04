@@ -1,15 +1,12 @@
 class MotorJuego:
     def __init__(self):
-        # Datos iniciales
-        self.personaje = ""
-        self.taller = ""
+        self.personaje = "Mecánico"
+        self.taller = "Mi Taller"
         self.dinero = 5000
         self.nivel = 1
         self.exp = 0
         self.exp_para_nivel = 100
-        
-        # Slots del taller: [Elevador, Parking 1, Parking 2]
-        self.slots = [None, None, None]
+        self.slots = [None, None, None] # Slot 0 es el elevador
 
     def agregar_experiencia(self, cantidad):
         self.exp += cantidad
@@ -22,14 +19,13 @@ class MotorJuego:
 
     def comprar_auto(self, auto):
         if self.dinero >= auto.precio_compra:
-            # Buscar primer slot vacío
             for i in range(len(self.slots)):
                 if self.slots[i] is None:
                     self.slots[i] = auto
                     self.dinero -= auto.precio_compra
-                    return True, "Auto comprado con éxito."
-            return False, "No hay espacio en el taller."
-        return False, "No tienes suficiente dinero."
+                    return True, "Auto comprado."
+            return False, "Taller lleno."
+        return False, "Dinero insuficiente."
 
     def reparar_motor(self, slot_index):
         auto = self.slots[slot_index]
