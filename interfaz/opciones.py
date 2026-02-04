@@ -15,5 +15,19 @@ class VentanaOpciones(ctk.CTkFrame):
         self.tema_btn.pack(pady=10)
         self.tema_btn.set(ctk.get_appearance_mode())
 
+        # --- PANTALLA COMPLETA (¡RECUPERADA!) ---
+        self.fullscreen_var = ctk.BooleanVar(value=False)
+        self.check_full = ctk.CTkCheckBox(self, text="Pantalla Completa", 
+                                         variable=self.fullscreen_var,
+                                         command=self.toggle_full)
+        self.check_full.pack(pady=15)
+
         # --- BOTÓN VOLVER ---
         ctk.CTkButton(self, text="⬅️ VOLVER", command=self.al_volver).pack(pady=30)
+
+    def toggle_full(self):
+        # master suele ser self.root si lo pasaste bien
+        if self.fullscreen_var.get():
+            self.master.attributes("-fullscreen", True)
+        else:
+            self.master.attributes("-fullscreen", False)

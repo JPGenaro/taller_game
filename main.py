@@ -194,16 +194,19 @@ class Aplicacion:
         ctk.CTkLabel(self.root, text="Desarrollado por: JP Genaro\nVersión: 0.2 Alpha", font=("Arial", 16)).pack(pady=20)
         ctk.CTkButton(self.root, text="VOLVER", command=self.mostrar_menu_inicio).pack(pady=20)
 
-    def abrir_menu_pausa(self):
-        # No limpiamos pantalla, queremos que el taller se vea de fondo (difuminado por el frame)
+    # Al tocar el engranaje en el taller
+    def abrir_pausa(self):
+        # IMPORTANTE: No llamamos a VentanaOpciones, llamamos a MenuPausa
         MenuPausa(self.root, self)
 
+    # Cuando tocas "Opciones" dentro del Menú de Pausa
     def mostrar_opciones_desde_pausa(self):
         self.limpiar_pantalla()
-        # Al volver de opciones en pausa, regresamos al MENU DE PAUSA
-        VentanaOpciones(self.root, al_volver=self.abrir_menu_pausa)
+        # Aquí VentanaOpciones ya NO pide motor ni db, por eso no dará error
+        VentanaOpciones(self.root, al_volver=self.abrir_pausa)
 
-    def mostrar_opciones(self): # Esta es la del menú principal
+    # Cuando tocas "Opciones" en el Menú de Inicio
+    def mostrar_opciones(self):
         self.limpiar_pantalla()
         VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio)
 
