@@ -33,3 +33,10 @@ class Database:
                               VALUES (?, ?, ?, ?, ?, ?)''',
                            (slot_id, motor.personaje, motor.taller, motor.dinero, motor.nivel, motor.exp))
             conn.commit()
+
+    def hay_partidas_guardadas(self):
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM partidas")
+            count = cursor.fetchone()[0]
+            return count > 0

@@ -27,15 +27,34 @@ class Aplicacion:
 
     def mostrar_menu_inicio(self):
         self.limpiar_pantalla()
-        self.root.grid_columnconfigure(0, weight=1)
+        
+        # Título del juego
+        ctk.CTkLabel(self.root, text="TALLER TYCOON", font=("Arial Bold", 40)).pack(pady=40)
 
-        ctk.CTkLabel(self.root, text="GARAGE TYCOON", font=("Arial", 45, "bold")).grid(row=0, pady=50)
-        
-        ctk.CTkButton(self.root, text="NUEVA PARTIDA", width=250, height=50,
-                      command=self.mostrar_registro).grid(row=1, pady=10)
-        
-        ctk.CTkButton(self.root, text="SALIR", width=250, height=50, fg_color="#A83232",
-                      command=self.root.quit).grid(row=2, pady=10)
+        # Contenedor de botones
+        menu_frame = ctk.CTkFrame(self.root, fg_color="transparent")
+        menu_frame.pack(expand=True)
+
+        # --- BOTÓN NUEVA PARTIDA ---
+        ctk.CTkButton(menu_frame, text="Nueva Partida", width=200, height=45,
+                      command=lambda: self.mostrar_seleccion_slot(modo="nueva")).pack(pady=10)
+
+        # --- BOTÓN CARGAR PARTIDA (Se desactiva si no hay saves) ---
+        estado_cargar = "normal" if self.db.hay_partidas_guardadas() else "disabled"
+        ctk.CTkButton(menu_frame, text="Cargar Partida", width=200, height=45, state=estado_cargar,
+                      command=lambda: self.mostrar_seleccion_slot(modo="cargar")).pack(pady=10)
+
+        # --- BOTÓN OPCIONES (Desactivado por ahora) ---
+        ctk.CTkButton(menu_frame, text="Opciones", width=200, height=45, state="disabled",
+                      fg_color="gray").pack(pady=10)
+
+        # --- BOTÓN CRÉDITOS ---
+        ctk.CTkButton(menu_frame, text="Créditos", width=200, height=45,
+                      command=self.mostrar_creditos).pack(pady=10)
+
+        # --- BOTÓN SALIR ---
+        ctk.CTkButton(menu_frame, text="Salir", width=200, height=45, fg_color="#e74c3c", 
+                      hover_color="#c0392b", command=self.root.quit).pack(pady=10)
 
     def mostrar_registro(self):
         self.limpiar_pantalla()
@@ -128,6 +147,47 @@ class Aplicacion:
 
         ctk.CTkButton(footer, text="🛒 BUSCAR AUTOS", command=abrir_mercado, 
               width=250, height=50).pack(side="left", padx=20)
+        
+    def mostrar_seleccion_slot(self, modo):
+        self.limpiar_pantalla()
+        titulo = "SELECCIONA UN SLOT PARA GUARDAR" if modo == "nueva" else "CARGAR PARTIDA"
+        ctk.CTkLabel(self.root, text=titulo, font=("Arial", 20)).pack(pady=20)
+
+        for i in range(1, 4):
+            datos = self.db.obtener_partida(i)
+            slot_frame = ctk.CTkFrame(self.root)
+            slot_frame.pack(fill="x", padx=40, pady=10)
+
+            if datos:
+                info_texto = f"Slot {i}: {datos[2]} - Nivel {datos[4]} (${datos[3]})"
+                btn_texto = "SOBRESCRIBIR" if modo == "nueva" else "CARGAR"
+            else:
+                info_texto = f"Slot {i}: VACÍO"
+                btn_texto = "USAR SLOT" if modo == "nueva" else "VACÍO"
+            
+            ctk.CTkLabel(slot_frame, text=info_texto).pack(side="left", padx=20, pady=15)
+            
+            # Solo habilitamos el botón si hay datos (en modo cargar) o siempre (en modo nueva)
+            btn_state = "normal" if (modo == "nueva" or datos) else "disabled"
+            
+            ctk.CTkButton(slot_frame, text=btn_texto, state=btn_state, width=100,
+                          command=lambda s=i: self.manejar_seleccion_slot(s, modo)).pack(side="right", padx=20)
+
+        ctk.CTkButton(self.root, text="VOLVER", command=self.mostrar_menu_inicio).pack(pady=20)
+
+    def manejar_seleccion_slot(self, slot_id, modo):
+        self.slot_actual = slot_id
+        if modo == "nueva":
+            self.mostrar_registro(slot_id)
+        else:
+            datos = self.db.obtener_partida(slot_id)
+            self.cargar_esta_partida(slot_id, datos)
+
+    def mostrar_creditos(self):
+        self.limpiar_pantalla()
+        ctk.CTkLabel(self.root, text="CRÉDITOS", font=("Arial Bold", 30)).pack(pady=30)
+        ctk.CTkLabel(self.root, text="Desarrollado por: JP Genaro\nVersión: 0.2 Alpha", font=("Arial", 16)).pack(pady=20)
+        ctk.CTkButton(self.root, text="VOLVER", command=self.mostrar_menu_inicio).pack(pady=20)
 
 if __name__ == "__main__":
     Aplicacion()
