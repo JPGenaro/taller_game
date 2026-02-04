@@ -105,7 +105,9 @@ class Aplicacion:
 
     def mostrar_opciones(self):
         self.limpiar_pantalla()
-        VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio)
+        VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio, 
+                motor=self.motor, db=self.db, slot_id=self.slot_actual,
+                juego=self)
 
     def mostrar_taller(self):
         self.limpiar_pantalla()
@@ -113,11 +115,9 @@ class Aplicacion:
         # --- BARRA SUPERIOR (Stats) ---
         def abrir_pausa():
             self.limpiar_pantalla()
-            VentanaOpciones(self.root, 
-                            al_volver=self.mostrar_taller, 
-                            motor=self.motor, 
-                            db=self.db, 
-                            slot_id=self.slot_actual)
+            VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio, 
+                motor=self.motor, db=self.db, slot_id=self.slot_actual,
+                juego=self)
 
         header = ctk.CTkFrame(self.root, height=80)
         header.pack(fill="x", padx=10, pady=10)
