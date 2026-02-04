@@ -23,3 +23,30 @@ class SlotTaller(ctk.CTkFrame):
         else:
             self.label_auto.configure(text="VACÍO", text_color="gray")
             self.btn_gestionar.configure(state="disabled")
+
+    def mostrar_detalles_auto(self, auto):
+        ventana_info = ctk.CTkToplevel(self)
+        ventana_info.title(f"Inspeccionando: {auto.marca} {auto.modelo}")
+        ventana_info.geometry("400x550")
+        ventana_info.after(10, ventana_info.lift)
+
+        ctk.CTkLabel(ventana_info, text="INFORME DE ESTADO", font=("Arial", 20, "bold")).pack(pady=20)
+
+        # Creamos una barrita de progreso por cada pieza
+        for parte, estado in auto.partes.items():
+            frame_parte = ctk.CTkFrame(ventana_info, fg_color="transparent")
+            frame_parte.pack(fill="x", padx=30, pady=5)
+            
+            ctk.CTkLabel(frame_parte, text=f"{parte}: {estado}%").pack(side="left")
+            
+            # Barra de progreso (0.0 a 1.0)
+            progreso = ctk.CTkProgressBar(frame_parte, width=150)
+            progreso.set(estado / 100)
+            progreso.pack(side="right")
+            
+            # Color según estado
+            if estado < 40: progreso.configure(progress_color="red")
+            elif estado < 75: progreso.configure(progress_color="yellow")
+            else: progreso.configure(progress_color="green")
+
+        ctk.CTkButton(ventana_info, text="CERRAR", command=ventana_info.destroy).pack(pady=20)

@@ -5,15 +5,22 @@ class Auto:
         self.marca = marca
         self.modelo = modelo
         self.precio_compra = precio_compra
-        # Estados aleatorios para que el juego sea un reto
-        self.motor = random.randint(10, 50)
-        self.carroceria = random.randint(20, 70)
-        self.limpieza = random.randint(5, 40)
         
-    def obtener_valor_venta(self):
-        # Un auto perfecto vale el doble de su compra
-        estado_general = (self.motor + self.carroceria + self.limpieza) / 300
-        return int(self.precio_compra * 2 * estado_general)
+        # El "Estado Mecánico" detallado
+        self.partes = {
+            "Motor": random.randint(20, 60),
+            "Caja de Cambios": random.randint(30, 70),
+            "Frenos": random.randint(40, 80),
+            "Suspension": random.randint(30, 75),
+            "Neumaticos": random.randint(20, 90),
+            "Cristales": random.randint(50, 100),
+            "Chapa": random.randint(10, 60)
+        }
 
-    def __str__(self):
-        return f"{self.marca} {self.modelo} (M:{self.motor}% C:{self.carroceria}%)"
+    def obtener_promedio_estado(self):
+        # Calcula el promedio de todas las partes
+        return sum(self.partes.values()) / len(self.partes)
+
+    def obtener_valor_reventa(self):
+        promedio = self.obtener_promedio_estado() / 100
+        return int(self.precio_compra * 1.5 * promedio)
