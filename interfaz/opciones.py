@@ -22,14 +22,8 @@ class VentanaOpciones(ctk.CTkFrame):
                                          command=self.toggle_full)
         self.check_full.pack(pady=15)
 
-        # --- BOTÓN VOLVER ---
         ctk.CTkButton(self, text="⬅️ VOLVER", command=self.al_volver).pack(pady=30)
 
     def toggle_full(self):
-        # En CustomTkinter, master.master suele llegar a la ventana principal (root)
-        # o puedes usar self.winfo_toplevel() que es más seguro
-        ventana_principal = self.winfo_toplevel()
-        if self.fullscreen_var.get():
-            ventana_principal.attributes("-fullscreen", True)
-        else:
-            ventana_principal.attributes("-fullscreen", False)
+        ventana = self.winfo_toplevel()
+        ventana.attributes("-fullscreen", self.fullscreen_var.get())

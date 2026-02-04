@@ -195,17 +195,13 @@ class Aplicacion:
         ctk.CTkButton(self.root, text="VOLVER", command=self.mostrar_menu_inicio).pack(pady=20)
 
     def abrir_pausa(self):
-        self.limpiar_pantalla()
-        VentanaOpciones(self.root, al_volver=self.mostrar_taller)
+        from interfaz.pausa import MenuPausa 
+        MenuPausa(self.root, self)
 
     def mostrar_opciones(self):
         self.limpiar_pantalla()
         VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio)
 
-    # Cuando tocas "Opciones" en el Menú de Inicio
-    def mostrar_opciones(self):
-        self.limpiar_pantalla()
-        VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio)
 
 if __name__ == "__main__":
     Aplicacion()
