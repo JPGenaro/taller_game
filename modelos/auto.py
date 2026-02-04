@@ -1,4 +1,6 @@
 import random
+import csv
+import os
 
 class Auto:
     def __init__(self, marca, modelo, precio_compra):
@@ -6,21 +8,27 @@ class Auto:
         self.modelo = modelo
         self.precio_compra = precio_compra
         
-        # El "Estado Mecánico" detallado
+        # Estado detallado
         self.partes = {
             "Motor": random.randint(20, 60),
-            "Caja de Cambios": random.randint(30, 70),
+            "Caja": random.randint(30, 70),
             "Frenos": random.randint(40, 80),
-            "Suspension": random.randint(30, 75),
-            "Neumaticos": random.randint(20, 90),
-            "Cristales": random.randint(50, 100),
-            "Chapa": random.randint(10, 60)
+            "Chasis": random.randint(10, 60),
+            "Ruedas": random.randint(20, 90)
         }
 
-    def obtener_promedio_estado(self):
-        # Calcula el promedio de todas las partes
-        return sum(self.partes.values()) / len(self.partes)
-
-    def obtener_valor_reventa(self):
-        promedio = self.obtener_promedio_estado() / 100
-        return int(self.precio_compra * 1.5 * promedio)
+    @staticmethod
+    def cargar_modelos_desde_csv():
+        modelos = []
+        ruta_csv = "datos/modelos_autos.csv"
+        
+        # Verificamos si existe el archivo para no romper el juego
+        if not os.path.exists(ruta_csv):
+            # Si no existe, devolvemos una lista de emergencia
+            return [("Fiat", "600", 500), ("Ford", "Falcon", 2000)]
+            
+        with open(ruta_csv, mode='r', encoding='utf-8') as f:
+            lector = csv.DictReader(f)
+            for fila in lector:
+                modelos.append((fila['marca'], fila['modelo'], int(fila['precio_base'])))
+        return modelos
