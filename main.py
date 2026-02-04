@@ -22,40 +22,29 @@ class Aplicacion:
         self.root.mainloop()
 
     def limpiar_pantalla(self):
-        # Destruye todos los widgets dentro de la ventana para "cambiar" de escena
         for widget in self.root.winfo_children():
             widget.destroy()
 
     def mostrar_menu_inicio(self):
         self.limpiar_pantalla()
         
-        # Título del juego
-        ctk.CTkLabel(self.root, text="TALLER TYCOON", font=("Arial Bold", 40)).pack(pady=40)
-
-        # Contenedor de botones
-        menu_frame = ctk.CTkFrame(self.root, fg_color="transparent")
-        menu_frame.pack(expand=True)
-
-        # --- BOTÓN NUEVA PARTIDA ---
-        ctk.CTkButton(menu_frame, text="Nueva Partida", width=200, height=45,
-                      command=lambda: self.mostrar_seleccion_slot(modo="nueva")).pack(pady=10)
-
-        # --- BOTÓN CARGAR PARTIDA (Se desactiva si no hay saves) ---
+        ctk.CTkLabel(self.root, text="GARAGE TYCOON", font=("Arial", 45, "bold")).pack(pady=40)
+        
+        ctk.CTkButton(self.root, text="NUEVA PARTIDA", width=250, height=50,
+                      command=lambda: self.mostrar_seleccion_slot("nueva")).pack(pady=10)
+        
         estado_cargar = "normal" if self.db.hay_partidas_guardadas() else "disabled"
-        ctk.CTkButton(menu_frame, text="Cargar Partida", width=200, height=45, state=estado_cargar,
-                      command=lambda: self.mostrar_seleccion_slot(modo="cargar")).pack(pady=10)
-
-        # --- BOTÓN OPCIONES ---
+        ctk.CTkButton(self.root, text="CARGAR PARTIDA", width=250, height=50, state=estado_cargar,
+                      command=lambda: self.mostrar_seleccion_slot("cargar")).pack(pady=10)
+        
         ctk.CTkButton(self.root, text="OPCIONES", width=250, height=50, 
-                  command=self.mostrar_opciones).grid(row=3, pady=10)
-
-        # --- BOTÓN CRÉDITOS ---
-        ctk.CTkButton(menu_frame, text="Créditos", width=200, height=45,
+                      command=self.mostrar_opciones).pack(pady=10)
+        
+        ctk.CTkButton(self.root, text="CRÉDITOS", width=250, height=50,
                       command=self.mostrar_creditos).pack(pady=10)
-
-        # --- BOTÓN SALIR ---
-        ctk.CTkButton(menu_frame, text="Salir", width=200, height=45, fg_color="#e74c3c", 
-                      hover_color="#c0392b", command=self.root.quit).pack(pady=10)
+        
+        ctk.CTkButton(self.root, text="SALIR", width=250, height=50, fg_color="#A83232",
+                      command=self.root.quit).pack(pady=10)
 
     def mostrar_registro(self, slot_id):
         self.limpiar_pantalla()
