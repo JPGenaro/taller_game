@@ -1,46 +1,54 @@
 import customtkinter as ctk
-from core.config import ConfigManager
 
 class VentanaOpciones(ctk.CTkFrame):
-    def __init__(self, master, al_volver, motor=None, db=None):
+    def __init__(self, master, al_volver, motor=None, db=None, slot_id=None):
         super().__init__(master)
-        self.al_volver = al_volver # Función para regresar
+        self.al_volver = al_volver
         self.motor = motor
         self.db = db
-        self.pack(expand=True, fill="both")
+        self.slot_id = slot_id
+        self.pack(expand=True, fill="both", padx=20, pady=20)
 
-        ctk.CTkLabel(self, text="OPCIONES / PAUSA", font=("Arial", 25, "bold")).pack(pady=30)
+        ctk.CTkLabel(self, text="⚙️ CONFIGURACIÓN", font=("Arial", 30, "bold")).pack(pady=20)
 
-        # --- SECCIÓN APARIENCIA ---
-        ctk.CTkLabel(self, text="Apariencia").pack()
-        self.switch_tema = ctk.CTkSegmentedButton(self, values=["Dark", "Light"], 
-                                                 command=ConfigManager.cambiar_tema)
-        self.switch_tema.pack(pady=10)
-        self.switch_tema.set(ctk.get_appearance_mode())
+        # --- TEMA ---
+        ctk.CTkLabel(self, text="Modo de Color:").pack(pady=5)
+        self.tema_btn = ctk.CTkSegmentedButton(self, values=["Dark", "Light"], 
+                                               command=self.cambiar_tema)
+        self.tema_btn.pack(pady=10)
+        self.tema_btn.set(ctk.get_appearance_mode())
 
-        # --- SECCIÓN PANTALLA ---
-        self.full_screen_var = ctk.BooleanVar(value=False)
-        self.check_full = ctk.CTkCheckBox(self, text="Pantalla Completa", variable=self.full_screen_var,
-                                         command=lambda: ConfigManager.toggle_pantalla_completa(master, self.full_screen_var.get()))
-        self.check_full.pack(pady=10)
+        # --- PANTALLA ---
+        self.fullscreen_var = ctk.BooleanVar(value=False)
+        self.check_full = ctk.CTkCheckBox(self, text="Pantalla Completa", 
+                                         variable=self.fullscreen_var,
+                                         command=self.toggle_full)
+        self.check_full.pack(pady=15)
 
-        ctk.CTkFrame(self, height=2, fg_color="gray").pack(fill="x", padx=50, pady=20)
+        # --- BOTONES DINÁMICOS (PAUSA) ---
+        if self.motor and self.db:
+            ctk.CTkButton(self, text="💾 GUARDAR PARTIDA", fg_color="#2ecc71",
+                          command=self.guardar_partida).pack(pady=10)
 
-        # --- BOTONES DE ACCIÓN (DINÁMICOS) ---
-        if self.motor: # Si hay un motor activo, estamos dentro del juego
-            ctk.CTkButton(self, text="Guardar Partida", fg_color="#2ecc71", 
-                          command=self.guardar_actual).pack(pady=5)
-            
-        ctk.CTkButton(self, text="Volver", command=self.al_volver).pack(pady=5)
-        
+        ctk.CTkButton(self, text="⬅️ VOLVER", command=self.al_volver).pack(pady=10)
+
         if self.motor:
-            ctk.CTkButton(self, text="Salir al Menú Principal", fg_color="#e74c3c", 
-                          command=self.salir_al_menu).pack(pady=5)
+            ctk.CTkButton(self, text="🚪 SALIR AL MENÚ", fg_color="#e74c3c",
+                          command=self.ir_al_inicio_desde_pausa).pack(pady=10)
 
-    def guardar_actual(self):
-        # Aquí llamaríamos a la lógica de DB para guardar el slot_actual
-        pass
+    def cambiar_tema(self, seleccion):
+        ctk.set_appearance_mode(seleccion)
 
-    def salir_al_menu(self):
-        # Lógica para cerrar todo y volver al inicio
-        pass
+    def toggle_full(self):
+        if self.fullscreen_var.get():
+            self.master.attributes("-fullscreen", True)
+        else:
+            self.master.attributes("-fullscreen", False)
+
+    def guardar_partida(self):
+        self.db.guardar(self.slot_id, self.motor)
+        print(f"Partida guardada en slot {self.slot_id}")
+
+    def ir_al_inicio_desde_pausa(self):
+        # Necesitamos que la Aplicación (master) tenga este método
+        self.master.mostrar_menu_inicio_desde_clase()

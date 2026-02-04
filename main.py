@@ -45,9 +45,9 @@ class Aplicacion:
         ctk.CTkButton(menu_frame, text="Cargar Partida", width=200, height=45, state=estado_cargar,
                       command=lambda: self.mostrar_seleccion_slot(modo="cargar")).pack(pady=10)
 
-        # --- BOTÓN OPCIONES (Desactivado por ahora) ---
-        ctk.CTkButton(menu_frame, text="Opciones", width=200, height=45, state="disabled",
-                      fg_color="gray").pack(pady=10)
+        # --- BOTÓN OPCIONES ---
+        ctk.CTkButton(self.root, text="OPCIONES", width=250, height=50, 
+                  command=self.mostrar_opciones).grid(row=3, pady=10)
 
         # --- BOTÓN CRÉDITOS ---
         ctk.CTkButton(menu_frame, text="Créditos", width=200, height=45,
@@ -122,9 +122,18 @@ class Aplicacion:
         self.limpiar_pantalla()
         
         # --- BARRA SUPERIOR (Stats) ---
+        def abrir_pausa():
+            self.limpiar_pantalla()
+            VentanaOpciones(self.root, 
+                            al_volver=self.mostrar_taller, 
+                            motor=self.motor, 
+                            db=self.db, 
+                            slot_id=self.slot_actual)
+
         header = ctk.CTkFrame(self.root, height=80)
         header.pack(fill="x", padx=10, pady=10)
         
+        ctk.CTkButton(header, text="⚙️", width=40, command=abrir_pausa).pack(side="right", padx=10)
         ctk.CTkLabel(header, text=f"💰 ${self.motor.dinero}", font=("Arial", 20, "bold"), text_color="#2ecc71").pack(side="left", padx=20)
         ctk.CTkLabel(header, text=f"Nivel {self.motor.nivel}", font=("Arial", 16)).pack(side="right", padx=20)
 
