@@ -56,8 +56,9 @@ class Aplicacion:
         ctk.CTkButton(menu_frame, text="Salir", width=200, height=45, fg_color="#e74c3c", 
                       hover_color="#c0392b", command=self.root.quit).pack(pady=10)
 
-    def mostrar_registro(self):
+    def mostrar_registro(self, slot_id):
         self.limpiar_pantalla()
+        self.slot_actual = slot_id
         
         ctk.CTkLabel(self.root, text="CONFIGURACIÓN INICIAL", font=("Arial", 25)).grid(row=0, pady=30)
         
