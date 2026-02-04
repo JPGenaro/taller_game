@@ -4,6 +4,7 @@ from core.database import Database
 from modelos.auto import Auto
 from interfaz.componentes import SlotTaller
 from interfaz.mercado import VentanaMercado
+from interfaz.opciones import VentanaOpciones
 
 class Aplicacion:
     def __init__(self):
@@ -113,6 +114,10 @@ class Aplicacion:
         self.motor.exp = datos[5]
         self.mostrar_taller()
 
+    def mostrar_opciones(self):
+        self.limpiar_pantalla()
+        VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio)
+
     def mostrar_taller(self):
         self.limpiar_pantalla()
         
@@ -149,6 +154,12 @@ class Aplicacion:
         ctk.CTkButton(footer, text="🛒 BUSCAR AUTOS", command=abrir_mercado, 
               width=250, height=50).pack(side="left", padx=20)
         
+
+    def pausa_taller(self):
+        self.limpiar_pantalla()
+        VentanaOpciones(self.root, al_volver=self.mostrar_taller, 
+                        motor=self.motor, db=self.db)
+    
     def mostrar_seleccion_slot(self, modo):
         self.limpiar_pantalla()
         titulo = "SELECCIONA UN SLOT PARA GUARDAR" if modo == "nueva" else "CARGAR PARTIDA"

@@ -17,13 +17,38 @@ class SlotTaller(ctk.CTkFrame):
         self.btn_gestionar.pack(pady=10, padx=10)
 
     def actualizar(self, auto):
+        self.auto_actual = auto # Guardamos la referencia del auto
         if auto:
-            self.label_auto.configure(text=f"{auto.marca}\n{auto.modelo}\nMotor: {auto.motor}%", text_color="white")
-            self.btn_gestionar.configure(state="normal")
+            self.label_auto.configure(text=f"{auto.marca}\n{auto.modelo}\nMotor: {auto.partes['Motor']}%", text_color="white")
+            self.btn_gestionar.configure(state="normal", command=self.abrir_inspeccion) # Agregamos el comando
         else:
             self.label_auto.configure(text="VACÍO", text_color="gray")
             self.btn_gestionar.configure(state="disabled")
 
+    def abrir_inspeccion(self):
+        # Esta es la ventana de detalles que mencionamos antes
+        ventana = ctk.CTkToplevel(self)
+        ventana.title(f"Diagnóstico: {self.auto_actual.marca}")
+        ventana.geometry("400x600")
+        ventana.after(10, ventana.lift)
+
+        ctk.CTkLabel(ventana, text="ESTADO DE COMPONENTES", font=("Arial", 18, "bold")).pack(pady=20)
+
+        for parte, estado in self.auto_actual.partes.items():
+            f = ctk.CTkFrame(ventana, fg_color="transparent")
+            f.pack(fill="x", padx=30, pady=5)
+            
+            ctk.CTkLabel(f, text=f"{parte}:").pack(side="left")
+            
+            bar = ctk.CTkProgressBar(f, width=150)
+            bar.set(estado / 100)
+            bar.pack(side="right")
+            
+            # Colores dinámicos según el desgaste
+            if estado < 30: bar.configure(progress_color="#e74c3c") # Rojo
+            elif estado < 70: bar.configure(progress_color="#f1c40f") # Amarillo
+            else: bar.configure(progress_color="#2ecc71") # Verde
+            
     def mostrar_detalles_auto(self, auto):
         ventana_info = ctk.CTkToplevel(self)
         ventana_info.title(f"Inspeccionando: {auto.marca} {auto.modelo}")
