@@ -4,6 +4,7 @@ from core.database import Database
 from modelos.auto import Auto
 from interfaz.componentes import SlotTaller
 from interfaz.mercado import VentanaMercado
+from interfaz.pausa import MenuPausa
 from interfaz.opciones import VentanaOpciones
 
 class Aplicacion:
@@ -103,12 +104,6 @@ class Aplicacion:
         self.motor.exp = datos[5]
         self.mostrar_taller()
 
-    def mostrar_opciones(self):
-        self.limpiar_pantalla()
-        VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio, 
-                motor=self.motor, db=self.db, slot_id=self.slot_actual,
-                juego=self)
-
     def mostrar_taller(self):
         self.limpiar_pantalla()
         
@@ -198,6 +193,19 @@ class Aplicacion:
         ctk.CTkLabel(self.root, text="CRÉDITOS", font=("Arial Bold", 30)).pack(pady=30)
         ctk.CTkLabel(self.root, text="Desarrollado por: JP Genaro\nVersión: 0.2 Alpha", font=("Arial", 16)).pack(pady=20)
         ctk.CTkButton(self.root, text="VOLVER", command=self.mostrar_menu_inicio).pack(pady=20)
+
+    def abrir_menu_pausa(self):
+        # No limpiamos pantalla, queremos que el taller se vea de fondo (difuminado por el frame)
+        MenuPausa(self.root, self)
+
+    def mostrar_opciones_desde_pausa(self):
+        self.limpiar_pantalla()
+        # Al volver de opciones en pausa, regresamos al MENU DE PAUSA
+        VentanaOpciones(self.root, al_volver=self.abrir_menu_pausa)
+
+    def mostrar_opciones(self): # Esta es la del menú principal
+        self.limpiar_pantalla()
+        VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio)
 
 if __name__ == "__main__":
     Aplicacion()
