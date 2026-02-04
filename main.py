@@ -57,6 +57,42 @@ class Aplicacion:
 
         ctk.CTkButton(self.root, text="¡ABRIR PUERTAS!", command=confirmar).grid(row=3, pady=30)
 
+    def mostrar_seleccion_slot(self, modo="cargar"):
+        self.limpiar_pantalla()
+        ctk.CTkLabel(self.root, text="SELECCIONAR SLOT", font=("Arial", 25)).pack(pady=30)
+        
+        container = ctk.CTkFrame(self.root, fg_color="transparent")
+        container.pack(expand=True, fill="both", padx=50)
+
+        for i in range(1, 4):
+            datos = self.db.obtener_partida(i)
+            slot_frame = ctk.CTkFrame(container)
+            slot_frame.pack(fill="x", pady=10, padx=20)
+            
+            if datos:
+                texto = f"Slot {i}: {datos[2]} ({datos[1]}) - Nivel {datos[4]} - ${datos[3]}"
+                color_btn = "#3498db"
+                cmd = lambda s=i, d=datos: self.cargar_esta_partida(s, d)
+            else:
+                texto = f"Slot {i}: VACÍO"
+                color_btn = "#2ecc71"
+                # Si estamos en modo cargar, el botón vacío se deshabilita
+                estado = "normal" if modo == "nueva" else "disabled"
+                cmd = lambda s=i: self.mostrar_registro(s)
+
+            ctk.CTkLabel(slot_frame, text=texto, font=("Arial", 14)).pack(side="left", padx=20, pady=20)
+            ctk.CTkButton(slot_frame, text="ELEGIR", fg_color=color_btn, width=100, 
+                          command=cmd).pack(side="right", padx=20)
+
+    def cargar_esta_partida(self, slot_id, datos):
+        self.slot_actual = slot_id
+        self.motor.personaje = datos[1]
+        self.motor.taller = datos[2]
+        self.motor.dinero = datos[3]
+        self.motor.nivel = datos[4]
+        self.motor.exp = datos[5]
+        self.mostrar_taller()
+
     def mostrar_taller(self):
         self.limpiar_pantalla()
         
@@ -88,8 +124,6 @@ class Aplicacion:
         footer.pack(fill="x", padx=10, pady=10)
         
         def abrir_mercado():
-            # Pasamos self.motor para que el mercado pueda descontar plata
-            # y self.mostrar_taller para que se refresque la pantalla al cerrar
             VentanaMercado(self.root, self.motor, self.mostrar_taller)
 
         ctk.CTkButton(footer, text="🛒 BUSCAR AUTOS", command=abrir_mercado, 

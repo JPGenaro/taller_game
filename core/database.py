@@ -8,8 +8,9 @@ class Database:
     def setup(self):
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
-            cursor.execute('''CREATE TABLE IF NOT EXISTS partida (
-                id INTEGER PRIMARY KEY,
+            # Agregamos 'slot_id' como clave primaria
+            cursor.execute('''CREATE TABLE IF NOT EXISTS partidas (
+                slot_id INTEGER PRIMARY KEY,
                 personaje TEXT,
                 taller TEXT,
                 dinero INTEGER,
@@ -18,11 +19,17 @@ class Database:
             )''')
             conn.commit()
 
-    def guardar(self, motor):
+    def obtener_partida(self, slot_id):
         with sqlite3.connect(self.db_name) as conn:
             cursor = conn.cursor()
-            # Borramos anterior y guardamos nuevo (simplificado para 1 sola partida)
-            cursor.execute("DELETE FROM partida")
-            cursor.execute("INSERT INTO partida VALUES (1, ?, ?, ?, ?, ?)",
-                           (motor.personaje, motor.taller, motor.dinero, motor.nivel, motor.exp))
+            cursor.execute("SELECT * FROM partidas WHERE slot_id = ?", (slot_id,))
+            return cursor.fetchone()
+
+    def guardar(self, slot_id, motor):
+        with sqlite3.connect(self.db_name) as conn:
+            cursor = conn.cursor()
+            cursor.execute('''INSERT OR REPLACE INTO partidas 
+                              (slot_id, personaje, taller, dinero, nivel, exp) 
+                              VALUES (?, ?, ?, ?, ?, ?)''',
+                           (slot_id, motor.personaje, motor.taller, motor.dinero, motor.nivel, motor.exp))
             conn.commit()
