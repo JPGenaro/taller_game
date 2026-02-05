@@ -42,3 +42,16 @@ class Motor:
                 return True, f"Auto comprado y colocado en el slot {idx+1}."
 
         return False, "No hay espacio en el taller (todos los slots están ocupados)."
+
+    def xp_para_siguiente(self) -> int:
+        """Devuelve la XP necesaria para subir del nivel actual al siguiente."""
+        # Fórmula simple: 100 * nivel (puedes ajustar a exponencial si querés)
+        return 100 * max(1, getattr(self, "nivel", 1))
+    
+    def progreso_nivel(self):
+        """Devuelve (xp_actual, xp_requerida, xp_faltante, porcentaje)."""
+        xp_actual = getattr(self, "exp", 0)
+        xp_req = self.xp_para_siguiente()
+        xp_faltante = max(0, xp_req - xp_actual)
+        porcentaje = min(1.0, xp_actual / xp_req) if xp_req > 0 else 1.0
+        return xp_actual, xp_req, xp_faltante, porcentaje

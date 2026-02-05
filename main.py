@@ -147,6 +147,20 @@ class Aplicacion:
         # Botón de Pausa (engranaje)
         ctk.CTkButton(header, text="⚙️", width=40, command=self.abrir_pausa).pack(side="right", padx=10)
 
+        # --- INFO DE NIVEL / XP (mantener el resto igual; agregado aquí) ---
+        try:
+            xp_actual, xp_req, xp_faltante, porcentaje = self.motor.progreso_nivel()
+        except Exception:
+            xp_actual, xp_req, xp_faltante, porcentaje = 0, 100, 100, 0.0
+
+        info_nivel = ctk.CTkFrame(self.root, height=40)
+        info_nivel.pack(fill="x", padx=12, pady=(4,10))
+        ctk.CTkLabel(info_nivel, text=f"Nivel: {getattr(self.motor, 'nivel', 1)}", font=("Arial", 12, "bold")).pack(side="left", padx=8)
+        ctk.CTkLabel(info_nivel, text=f"XP: {xp_actual} / {xp_req}  (faltan {xp_faltante})", font=("Arial", 11)).pack(side="left", padx=8)
+        barra_xp = ctk.CTkProgressBar(info_nivel, width=300)
+        barra_xp.set(porcentaje)
+        barra_xp.pack(side="right", padx=12)
+
         # --- ZONA DE TRABAJO (Elevadores) ---
         zona_elevadores = ctk.CTkFrame(self.root, fg_color="transparent")
         zona_elevadores.pack(expand=True, fill="both", padx=20, pady=10)
