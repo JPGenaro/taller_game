@@ -23,3 +23,22 @@ class Motor:
             # Resetear slots al cargar (podrías cargar autos aquí en el futuro)
             self.slots = [None, None, None]
             print(f"Datos cargados: {self.personaje} - ${self.dinero}")
+
+    def comprar_auto(self, auto):
+        """
+        Intenta comprar un auto:
+        - Verifica dinero
+        - Busca primer slot vacío y coloca el auto
+        - Deduce el dinero y devuelve (True, mensaje) o (False, mensaje)
+        """
+        if self.dinero < auto.precio_compra:
+            return False, f"No tienes suficiente dinero (${self.dinero}) para comprar este auto (${auto.precio_compra})."
+
+        # Buscar primer slot vacío
+        for idx, slot in enumerate(self.slots):
+            if slot is None:
+                self.slots[idx] = auto
+                self.dinero -= auto.precio_compra
+                return True, f"Auto comprado y colocado en el slot {idx+1}."
+
+        return False, "No hay espacio en el taller (todos los slots están ocupados)."
