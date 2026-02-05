@@ -134,34 +134,45 @@ class Aplicacion:
         ctk.CTkButton(self.root, text="COMENZAR AVENTURA", command=confirmar).pack(pady=30)
 
     def mostrar_taller(self):
-        """Interfaz principal del taller de reparaciones."""
+        """Interfaz principal del taller de reparaciones (Elevadores y Parking)."""
         self.limpiar_pantalla()
         
-        # Header de información
+        # --- HEADER (Info del Jugador) ---
         header = ctk.CTkFrame(self.root, height=60)
         header.pack(fill="x", side="top", padx=10, pady=5)
         
-        ctk.CTkLabel(header, text=f"🏠 {self.motor.taller}").pack(side="left", padx=20)
-        ctk.CTkLabel(header, text=f"👤 {self.motor.personaje}").pack(side="left", padx=20)
-        ctk.CTkLabel(header, text=f"💰 ${self.motor.dinero}", text_color="#2ecc71").pack(side="right", padx=20)
-
-        # Botón de Pausa
+        ctk.CTkLabel(header, text=f"🏠 {self.motor.taller}", font=("Arial", 16, "bold")).pack(side="left", padx=20)
+        ctk.CTkLabel(header, text=f"💰 ${self.motor.dinero}", text_color="#2ecc71", font=("Arial", 16, "bold")).pack(side="right", padx=20)
+        
+        # Botón de Pausa (engranaje)
         ctk.CTkButton(header, text="⚙️", width=40, command=self.abrir_pausa).pack(side="right", padx=10)
 
-        # Zona de Slots de Autos
-        grid_autos = ctk.CTkFrame(self.root, fg_color="transparent")
-        grid_autos.pack(expand=True, fill="both", padx=20, pady=20)
+        # --- ZONA DE TRABAJO (Elevadores) ---
+        zona_elevadores = ctk.CTkFrame(self.root, fg_color="transparent")
+        zona_elevadores.pack(expand=True, fill="both", padx=20, pady=10)
 
-        for i in range(2): # 2 slots para empezar
-            slot = SlotTaller(grid_autos, self)
-            slot.actualizar(self.motor.slots[i])
-            slot.pack(side="left", expand=True, fill="both", padx=10)
+        # Pasamos: master, titulo y color (como pide tu interfaz/componentes.py)
+        for i in range(2): 
+            slot_ui = SlotTaller(zona_elevadores, titulo=f"ELEVADOR {i+1}", color="#2b2b2b") 
+            slot_ui.actualizar(self.motor.slots[i])
+            slot_ui.pack(side="left", expand=True, fill="both", padx=10)
 
-        # Barra inferior de navegación
-        footer = ctk.CTkFrame(self.root, height=50)
+        # --- ZONA DE PARKING ---
+        zona_parking = ctk.CTkFrame(self.root, height=150, fg_color="transparent")
+        zona_parking.pack(fill="x", padx=20, pady=10)
+
+        # Pasamos: master, titulo y color
+        slot_parking = SlotTaller(zona_parking, titulo="ESTACIONAMIENTO", color="#1f1f1f")
+        slot_parking.actualizar(self.motor.slots[2])
+        slot_parking.pack(side="left", expand=True, fill="both", padx=10)
+        
+        # --- FOOTER (Navegación) ---
+        footer = ctk.CTkFrame(self.root, height=70)
         footer.pack(fill="x", side="bottom", pady=10)
-        ctk.CTkButton(footer, text="MERCADO", command=self.abrir_mercado).pack(expand=True)
-
+        
+        ctk.CTkButton(footer, text="🛒 IR AL MERCADO", height=45, width=200,
+                      command=self.abrir_mercado).pack(expand=True)
+        
     # --- MODALES Y VENTANAS SECUNDARIAS ---
 
     def abrir_pausa(self):

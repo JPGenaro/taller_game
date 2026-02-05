@@ -1,9 +1,9 @@
 import customtkinter as ctk
 
 class SlotTaller(ctk.CTkFrame):
-    def __init__(self, master, titulo, color, **kwargs):
+    def __init__(self, master, titulo, color, juego=None, **kwargs):
         super().__init__(master, fg_color=color, border_width=2, **kwargs)
-        
+        self.juego = juego
         self.titulo = titulo
         # Label del Título (ELEVADOR / PARKING)
         ctk.CTkLabel(self, text=self.titulo, font=("Arial", 14, "bold")).pack(pady=10)
