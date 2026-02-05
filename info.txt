@@ -5,3 +5,6 @@ Agregar botones de salir, guardar a la ventana del taller. Hacer un menu digamos
 Agregar mas componentes a los autos(km, patentes, bateria) y dividir un poco mas lo que estan
 Poder gestionar los autos que se compran, arreglar y vender
 Agregar sistema de clientes con historias y etc
+
+Instalar dependencias (requeriment.txt)
+pip install -r requirements.txt
