@@ -12,20 +12,67 @@ class Motor:
 
     def cargar_datos(self, datos):
         """
-        Toma la tupla de la DB y actualiza los atributos del motor.
-        Asumiendo el orden: (id, slot_id, personaje, dinero, nivel, exp, taller)
+        Carga datos desde distintas formas que puede devolver la Database:
+        - dict (json guardado)
+        - tupla/list (compatibilidad con obtener_partida)
+        - None (inicializa valores por defecto)
         """
-        if datos:
-            # Los índices dependen de cómo creaste tu tabla en database.py
-            self.personaje = datos[2]
-            self.dinero = datos[3]
-            self.nivel = datos[4]
-            self.exp = datos[5]
-            self.taller = datos[6] if len(datos) > 6 else "Mi Taller"
-            
-            # Resetear slots al cargar (podrías cargar autos aquí en el futuro)
+        # Valores por defecto
+        if not datos:
+            self.personaje = ""
+            self.taller = ""
+            self.dinero = 5000
+            self.nivel = 1
+            self.exp = 0
             self.slots = [None, None, None]
+            print("Datos cargados: (vacío)")
+            return
+
+        # Si nos pasan un dict (p. ej. json cargado), delegamos a from_dict
+        if isinstance(datos, dict):
+            m = Motor.from_dict(datos) if hasattr(Motor, "from_dict") else None
+            if m:
+                self.personaje = m.personaje
+                self.taller = m.taller
+                self.dinero = m.dinero
+                self.nivel = m.nivel
+                self.exp = m.exp
+                self.slots = m.slots
+                print(f"Datos cargados: {self.personaje} - ${self.dinero}")
+                return
+
+        # Compatibilidad con tuplas/arrays antiguas devueltas por obtener_partida
+        if isinstance(datos, (list, tuple)):
+            # esperar formatos variables; asignar con checks de longitud
+            try:
+                self.personaje = datos[2] if len(datos) > 2 else getattr(self, "personaje", "")
+                self.taller = datos[3] if len(datos) > 3 else getattr(self, "taller", "")
+                self.nivel = int(datos[4]) if len(datos) > 4 else getattr(self, "nivel", 1)
+                # exp y dinero pueden no estar presentes en versiones antiguas
+                self.exp = int(datos[5]) if len(datos) > 5 else getattr(self, "exp", 0)
+                self.dinero = int(datos[6]) if len(datos) > 6 else getattr(self, "dinero", 5000)
+            except Exception:
+                # en caso de formato inesperado, mantener valores actuales/por defecto
+                self.personaje = getattr(self, "personaje", "")
+                self.taller = getattr(self, "taller", "")
+                self.dinero = getattr(self, "dinero", 5000)
+                self.nivel = getattr(self, "nivel", 1)
+                self.exp = getattr(self, "exp", 0)
+
+            # Asegurar slots inicializados
+            if not hasattr(self, "slots") or self.slots is None:
+                self.slots = [None, None, None]
             print(f"Datos cargados: {self.personaje} - ${self.dinero}")
+            return
+
+        # Si llega algo inesperado, inicializar por seguridad
+        self.personaje = ""
+        self.taller = ""
+        self.dinero = 5000
+        self.nivel = 1
+        self.exp = 0
+        self.slots = [None, None, None]
+        print("Datos cargados: formato desconocido, se usaron valores por defecto.")
 
     def comprar_auto(self, auto):
         """
