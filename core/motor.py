@@ -1,3 +1,6 @@
+import json
+import datetime
+
 class Motor:
     def __init__(self):
         self.personaje = ""
@@ -55,3 +58,40 @@ class Motor:
         xp_faltante = max(0, xp_req - xp_actual)
         porcentaje = min(1.0, xp_actual / xp_req) if xp_req > 0 else 1.0
         return xp_actual, xp_req, xp_faltante, porcentaje
+
+    # Serialización para guardar/cargar
+    def to_dict(self) -> dict:
+        """Convierte el estado del Motor a un dict serializable."""
+        return {
+            "personaje": self.personaje,
+            "taller": self.taller,
+            "dinero": self.dinero,
+            "nivel": self.nivel,
+            "exp": self.exp,
+            # Guardamos los autos en slots como dicts (o None)
+            "slots": [s.__dict__ if s is not None else None for s in self.slots]
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        """Crea un Motor a partir de un dict (útil al cargar desde DB)."""
+        m = cls()
+        m.personaje = data.get("personaje", "")
+        m.taller = data.get("taller", "")
+        m.dinero = data.get("dinero", 0)
+        m.nivel = data.get("nivel", 1)
+        m.exp = data.get("exp", 0)
+        slots_data = data.get("slots", [None, None, None])
+        m.slots = []
+        from modelos.auto import Auto
+        for s in slots_data:
+            if s is None:
+                m.slots.append(None)
+            else:
+                # Reconstruir Auto: se asume que Auto acepta (marca,modelo,precio_compra)
+                a = Auto(s.get("marca", "Desconocida"), s.get("modelo", "X"), s.get("precio_compra", 0))
+                # Restaurar partes y demás si existen
+                if "partes" in s:
+                    a.partes = s["partes"]
+                m.slots.append(a)
+        return m
