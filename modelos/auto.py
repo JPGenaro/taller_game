@@ -14,7 +14,17 @@ class Auto:
             "Caja": random.randint(30, 70),
             "Frenos": random.randint(40, 80),
             "Chasis": random.randint(10, 60),
-            "Ruedas": random.randint(20, 90)
+            "Ruedas": random.randint(20, 90),
+            "Suspensión": random.randint(20, 80),
+            "Dirección": random.randint(30, 80),
+            "Escape": random.randint(20, 75),
+            "Sistema Eléctrico": random.randint(25, 85),
+            "Batería": random.randint(30, 90),
+            "Radiador": random.randint(20, 70),
+            "Aire Acondicionado": random.randint(30, 85),
+            "Luces": random.randint(40, 95),
+            "Pintura": random.randint(10, 100),
+            "Interior": random.randint(10, 100)
         }
 
     @staticmethod
