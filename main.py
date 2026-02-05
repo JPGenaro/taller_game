@@ -141,7 +141,11 @@ class Aplicacion:
         header = ctk.CTkFrame(self.root, height=60)
         header.pack(fill="x", side="top", padx=10, pady=5)
         
-        ctk.CTkLabel(header, text=f"🏠 {self.motor.taller}", font=("Arial", 16, "bold")).pack(side="left", padx=20)
+        # Mostrar nombre de personaje y nombre del taller juntos a la izquierda
+        nombre_personaje = getattr(self.motor, "personaje", "Jugador")
+        nombre_taller = getattr(self.motor, "taller", "Mi Taller")
+        ctk.CTkLabel(header, text=f"👤 {nombre_personaje}   |   🏠 {nombre_taller}", font=("Arial", 16, "bold")).pack(side="left", padx=20)
+        
         ctk.CTkLabel(header, text=f"💰 ${self.motor.dinero}", text_color="#2ecc71", font=("Arial", 16, "bold")).pack(side="right", padx=20)
         
         # Botón de Pausa (engranaje)
