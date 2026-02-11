@@ -1,6 +1,7 @@
 import random
 import csv
 import os
+from core.config import ConfigManager
 
 class Auto:
     def __init__(self, marca, modelo, precio_compra, partes=None):
@@ -49,7 +50,7 @@ class Auto:
     @staticmethod
     def cargar_modelos_desde_csv():
         modelos = []
-        ruta_csv = "datos/modelos_autos.csv"
+        ruta_csv = ConfigManager.data_path("modelos_autos.csv")
         
         # Verificamos si existe el archivo para no romper el juego
         if not os.path.exists(ruta_csv):

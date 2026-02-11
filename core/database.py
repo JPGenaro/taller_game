@@ -50,7 +50,7 @@ class Database:
             raise ValueError("El objeto motor no es serializable (falta to_dict).")
         data = motor.to_dict()
         texto = json.dumps(data, ensure_ascii=False)
-        updated = datetime.datetime.utcnow().isoformat()
+        updated = datetime.datetime.now(datetime.UTC).isoformat()
         with self._conn() as conn:
             cur = conn.cursor()
             cur.execute("REPLACE INTO partidas(slot, data, updated_at) VALUES (?, ?, ?)", (slot, texto, updated))
