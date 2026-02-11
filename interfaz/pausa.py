@@ -31,9 +31,7 @@ class MenuPausa(ctk.CTkFrame):
 
     def guardar_y_continuar(self):
         """Usa la instancia del juego para guardar el estado actual."""
-        self.juego.db.guardar(self.juego.slot_actual, self.juego.motor)
-        # Opcional: podrías poner un label temporal que diga "¡Guardado!"
-        print(f"Progreso guardado en el Slot {self.juego.slot_actual}")
+        self.juego.guardar_partida(self.juego.slot_actual, parent_window=self)
 
     def ir_a_opciones(self):
         """Navega a la pantalla de opciones."""

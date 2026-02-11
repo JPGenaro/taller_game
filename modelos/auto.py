@@ -3,13 +3,13 @@ import csv
 import os
 
 class Auto:
-    def __init__(self, marca, modelo, precio_compra):
+    def __init__(self, marca, modelo, precio_compra, partes=None):
         self.marca = marca
         self.modelo = modelo
         self.precio_compra = precio_compra
-        
+
         # Estado detallado
-        self.partes = {
+        self.partes = partes or {
             "Motor": random.randint(20, 60),
             "Caja": random.randint(30, 70),
             "Frenos": random.randint(40, 80),
@@ -26,6 +26,25 @@ class Auto:
             "Pintura": random.randint(10, 100),
             "Interior": random.randint(10, 100)
         }
+
+    def to_dict(self) -> dict:
+        return {
+            "marca": self.marca,
+            "modelo": self.modelo,
+            "precio_compra": self.precio_compra,
+            "partes": self.partes
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        if not data:
+            return None
+        return cls(
+            data.get("marca", "Desconocida"),
+            data.get("modelo", "X"),
+            data.get("precio_compra", 0),
+            partes=data.get("partes")
+        )
 
     @staticmethod
     def cargar_modelos_desde_csv():

@@ -6,6 +6,7 @@ from interfaz.mercado import VentanaMercado
 from interfaz.componentes import SlotTaller
 from interfaz.opciones import VentanaOpciones
 from interfaz.pausa import MenuPausa  # Asegúrate de tener este archivo creado
+from tkinter import messagebox, simpledialog
 
 class Aplicacion:
     def __init__(self):
@@ -66,11 +67,11 @@ class Aplicacion:
         ctk.CTkLabel(self.root, text=f"SELECCIONAR SLOT ({modo.upper()})", font=("Arial", 25)).pack(pady=30)
 
         for i in range(1, 4):
-            datos = self.db.obtener_partida(i)
+            datos = self.db.obtener_resumen_partida(i)
             frame = ctk.CTkFrame(self.root)
             frame.pack(fill="x", padx=50, pady=10)
 
-            info = f"Slot {i}: {datos[2]} (Nivel {datos[4]})" if datos else f"Slot {i}: VACÍO"
+            info = f"Slot {i}: {datos['personaje']} (Nivel {datos['nivel']})" if datos else f"Slot {i}: VACÍO"
             ctk.CTkLabel(frame, text=info).pack(side="left", padx=20, pady=15)
 
             # Lógica de botón según modo
@@ -110,8 +111,8 @@ class Aplicacion:
         if modo == "nueva":
             self.mostrar_registro()
         else:
-            datos = self.db.obtener_partida(slot_id)
-            self.motor.cargar_datos(datos) # Asegúrate de tener este método en motor.py
+            datos = self.db.cargar_partida(slot_id)
+            self.motor.cargar_datos(datos)
             self.mostrar_taller()
 
     def mostrar_registro(self):
@@ -128,8 +129,10 @@ class Aplicacion:
             if ent_nombre.get() and ent_taller.get():
                 self.motor.personaje = ent_nombre.get()
                 self.motor.taller = ent_taller.get()
-                self.db.guardar(self.slot_actual, self.motor)
-                self.mostrar_taller()
+                # Guardar y solo pasar a taller si se guardó con éxito
+                guardado = self.guardar_partida(self.slot_actual)  # no pasar ventana inexistente
+                if guardado:
+                    self.mostrar_taller()
 
         ctk.CTkButton(self.root, text="COMENZAR AVENTURA", command=confirmar).pack(pady=30)
 
@@ -205,6 +208,71 @@ class Aplicacion:
     def abrir_mercado(self):
         """Abre la ventana de compra de autos."""
         VentanaMercado(self.root, self.motor, self.mostrar_taller)
+
+    def guardar_partida(self, slot: int | None = None, parent_window=None):
+        """
+        Guarda la partida en DB y muestra un mensaje informando el resultado.
+        Si no se pasa slot pide al usuario que seleccione un slot.
+        parent_window: si se pasa, se destruirá antes de mostrar el mensaje.
+        """
+        # Forzar foco para evitar que el messagebox quede detrás
+        try:
+            self.root.deiconify()
+            self.root.lift()
+            self.root.focus_force()
+            self.root.update()
+        except Exception:
+            pass
+
+        slot_to_use = slot if slot is not None else self.slot_actual
+        if slot_to_use is None:
+            slot_chosen = simpledialog.askinteger(
+                "Elegir slot",
+                "Elegí un slot para guardar (1-3):",
+                parent=self.root,
+                minvalue=1,
+                maxvalue=3
+            )
+            if slot_chosen is None:
+                return False
+            slot_to_use = slot_chosen
+
+        try:
+            self.db.guardar_partida(slot_to_use, self.motor)
+            self.slot_actual = slot_to_use
+
+            # Si nos pasan una ventana modal, cerrarla primero para que el dialogo sea visible
+            try:
+                if parent_window is not None:
+                    parent_window.destroy()
+            except Exception:
+                pass
+
+            # Mostrar el messagebox con un small delay para asegurar el foco y orden de ventanas
+            def _show_ok():
+                try:
+                    messagebox.showinfo("Guardar partida", f"Partida guardada en el slot {slot_to_use}.", parent=self.root)
+                except Exception:
+                    # fallback sin parent
+                    messagebox.showinfo("Guardar partida", f"Partida guardada en el slot {slot_to_use}.")
+
+            self.root.after(120, _show_ok)
+            return True
+        except Exception as e:
+            # Cerrar modal si existe antes de error
+            try:
+                if parent_window is not None:
+                    parent_window.destroy()
+            except Exception:
+                pass
+
+            def _show_err():
+                try:
+                    messagebox.showerror("Error al guardar", f"No se pudo guardar la partida:\n{e}", parent=self.root)
+                except Exception:
+                    messagebox.showerror("Error al guardar", f"No se pudo guardar la partida:\n{e}")
+            self.root.after(120, _show_err)
+            return False
 
 if __name__ == "__main__":
     Aplicacion()

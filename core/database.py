@@ -67,6 +67,30 @@ class Database:
             except Exception:
                 return None
 
+    def obtener_resumen_partida(self, slot: int):
+        """
+        Devuelve un resumen para listar en el menú:
+        {"slot": int, "personaje": str, "taller": str, "nivel": int, "updated_at": str}
+        o None si no existe.
+        """
+        with self._conn() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT slot, data, updated_at FROM partidas WHERE slot = ?", (slot,))
+            row = cur.fetchone()
+            if not row:
+                return None
+            try:
+                data = json.loads(row[1])
+            except Exception:
+                data = {}
+            return {
+                "slot": row[0],
+                "personaje": data.get("personaje", "VACÍO"),
+                "taller": data.get("taller", ""),
+                "nivel": data.get("nivel", 1),
+                "updated_at": row[2]
+            }
+
     def obtener_partida(self, slot: int):
         """
         Compatibilidad con la interfaz antigua.

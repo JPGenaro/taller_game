@@ -1,6 +1,7 @@
 import customtkinter as ctk
 import random
 from modelos.auto import Auto
+from tkinter import messagebox
 
 class VentanaMercado(ctk.CTkToplevel):
     def __init__(self, master, motor, callback_actualizar):
@@ -42,8 +43,8 @@ class VentanaMercado(ctk.CTkToplevel):
     def intentar_compra(self, auto):
         exito, mensaje = self.motor.comprar_auto(auto)
         if exito:
-            print(f"Compraste un {auto.marca}!")
+            messagebox.showinfo("Compra exitosa", mensaje, parent=self)
             self.callback_actualizar()
             self.destroy()
         else:
-            print(mensaje)
+            messagebox.showerror("Compra fallida", mensaje, parent=self)

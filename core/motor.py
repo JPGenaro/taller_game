@@ -28,7 +28,7 @@ class Motor:
             print("Datos cargados: (vacío)")
             return
 
-        # Si nos pasan un dict (p. ej. json cargado), delegamos a from_dict
+        # Si nos pasan un dict (p. ej. json guardado), delegamos a from_dict
         if isinstance(datos, dict):
             m = Motor.from_dict(datos) if hasattr(Motor, "from_dict") else None
             if m:
@@ -116,7 +116,7 @@ class Motor:
             "nivel": self.nivel,
             "exp": self.exp,
             # Guardamos los autos en slots como dicts (o None)
-            "slots": [s.__dict__ if s is not None else None for s in self.slots]
+            "slots": [s.to_dict() if s is not None else None for s in self.slots]
         }
 
     @classmethod
@@ -135,10 +135,5 @@ class Motor:
             if s is None:
                 m.slots.append(None)
             else:
-                # Reconstruir Auto: se asume que Auto acepta (marca,modelo,precio_compra)
-                a = Auto(s.get("marca", "Desconocida"), s.get("modelo", "X"), s.get("precio_compra", 0))
-                # Restaurar partes y demás si existen
-                if "partes" in s:
-                    a.partes = s["partes"]
-                m.slots.append(a)
+                m.slots.append(Auto.from_dict(s))
         return m
