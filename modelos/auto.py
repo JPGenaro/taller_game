@@ -4,10 +4,11 @@ import os
 from core.config import ConfigManager
 
 class Auto:
-    def __init__(self, marca, modelo, precio_compra, partes=None):
+    def __init__(self, marca, modelo, precio_compra, partes=None, km=None):
         self.marca = marca
         self.modelo = modelo
         self.precio_compra = precio_compra
+        self.km = km if km is not None else random.randint(20000, 250000)
 
         # Estado detallado
         self.partes = partes or {
@@ -33,6 +34,7 @@ class Auto:
             "marca": self.marca,
             "modelo": self.modelo,
             "precio_compra": self.precio_compra,
+            "km": self.km,
             "partes": self.partes
         }
 
@@ -44,8 +46,23 @@ class Auto:
             data.get("marca", "Desconocida"),
             data.get("modelo", "X"),
             data.get("precio_compra", 0),
-            partes=data.get("partes")
+            partes=data.get("partes"),
+            km=data.get("km")
         )
+
+    def promedio_estado(self) -> float:
+        if not self.partes:
+            return 0.0
+        return sum(self.partes.values()) / len(self.partes)
+
+    def valor_venta(self) -> int:
+        # Estado promedio (0..1)
+        estado = self.promedio_estado() / 100.0
+        # Factor por kilometraje (degrada hasta 40%)
+        km_factor = max(0.6, 1 - (self.km / 400000))
+        base = self.precio_compra
+        # Nunca vender por menos del 60% del precio base ajustado por km
+        return max(0, int(base * max(0.6, (0.6 + 0.4 * estado)) * km_factor))
 
     @staticmethod
     def cargar_modelos_desde_csv():

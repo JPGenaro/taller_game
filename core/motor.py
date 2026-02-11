@@ -9,6 +9,7 @@ class Motor:
         self.nivel = 1
         self.exp = 0
         self.slots = [None, None, None] # Lista para los autos en el taller
+        self.historial = []
 
     def cargar_datos(self, datos):
         """
@@ -25,6 +26,7 @@ class Motor:
             self.nivel = 1
             self.exp = 0
             self.slots = [None, None, None]
+            self.historial = []
             print("Datos cargados: (vacío)")
             return
 
@@ -72,6 +74,7 @@ class Motor:
         self.nivel = 1
         self.exp = 0
         self.slots = [None, None, None]
+        self.historial = []
         print("Datos cargados: formato desconocido, se usaron valores por defecto.")
 
     def comprar_auto(self, auto):
@@ -89,6 +92,7 @@ class Motor:
             if slot is None:
                 self.slots[idx] = auto
                 self.dinero -= auto.precio_compra
+                self.historial.append(f"Compra: {auto.marca} {auto.modelo} por ${auto.precio_compra}")
                 return True, f"Auto comprado y colocado en el slot {idx+1}."
 
         return False, "No hay espacio en el taller (todos los slots están ocupados)."
@@ -106,6 +110,43 @@ class Motor:
         porcentaje = min(1.0, xp_actual / xp_req) if xp_req > 0 else 1.0
         return xp_actual, xp_req, xp_faltante, porcentaje
 
+    def costo_reparacion_total(self, auto) -> int:
+        # Costo por punto faltante (balanceado)
+        costo_por_punto = 2
+        faltante = sum(100 - v for v in auto.partes.values())
+        # Topar a 120% del precio de compra
+        return min(int(max(0, faltante) * costo_por_punto), int(auto.precio_compra * 1.2))
+
+    def reparar_auto_total(self, slot_index: int):
+        if slot_index < 0 or slot_index >= len(self.slots):
+            return False, "Slot inválido."
+        auto = self.slots[slot_index]
+        if not auto:
+            return False, "No hay auto en ese slot."
+
+        costo = self.costo_reparacion_total(auto)
+        if self.dinero < costo:
+            return False, f"Dinero insuficiente. Necesitas ${costo}."
+
+        for parte in auto.partes:
+            auto.partes[parte] = 100
+        self.dinero -= costo
+        self.historial.append(f"Reparación total: {auto.marca} {auto.modelo} por ${costo}")
+        return True, f"Auto reparado por ${costo}."
+
+    def vender_auto(self, slot_index: int):
+        if slot_index < 0 or slot_index >= len(self.slots):
+            return False, "Slot inválido."
+        auto = self.slots[slot_index]
+        if not auto:
+            return False, "No hay auto en ese slot."
+
+        precio = auto.valor_venta()
+        self.dinero += precio
+        self.slots[slot_index] = None
+        self.historial.append(f"Venta: {auto.marca} {auto.modelo} por ${precio}")
+        return True, f"Auto vendido por ${precio}."
+
     # Serialización para guardar/cargar
     def to_dict(self) -> dict:
         """Convierte el estado del Motor a un dict serializable."""
@@ -116,7 +157,8 @@ class Motor:
             "nivel": self.nivel,
             "exp": self.exp,
             # Guardamos los autos en slots como dicts (o None)
-            "slots": [s.to_dict() if s is not None else None for s in self.slots]
+            "slots": [s.to_dict() if s is not None else None for s in self.slots],
+            "historial": self.historial
         }
 
     @classmethod
@@ -129,6 +171,7 @@ class Motor:
         m.nivel = data.get("nivel", 1)
         m.exp = data.get("exp", 0)
         slots_data = data.get("slots", [None, None, None])
+        m.historial = data.get("historial", [])
         m.slots = []
         from modelos.auto import Auto
         for s in slots_data:

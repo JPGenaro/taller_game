@@ -1,16 +1,18 @@
 import customtkinter as ctk
+from core.ui_theme import COLORS, FONTS
 
 class VentanaOpciones(ctk.CTkFrame):
     def __init__(self, master, al_volver, db=None):
         super().__init__(master)
         self.al_volver = al_volver
         self.db = db
+        self.configure(fg_color=COLORS["bg"])
         self.pack(expand=True, fill="both", padx=20, pady=20)
 
-        ctk.CTkLabel(self, text="CONFIGURACIÓN", font=("Arial", 30, "bold")).pack(pady=20)
+        ctk.CTkLabel(self, text="CONFIGURACIÓN", font=FONTS["title"], text_color=COLORS["text"]).pack(pady=20)
 
         # MODO OSCURO/CLARO
-        ctk.CTkLabel(self, text="Tema:").pack(pady=5)
+        ctk.CTkLabel(self, text="Tema:", text_color=COLORS["muted"], font=FONTS["small"]).pack(pady=5)
         self.tema = ctk.CTkSegmentedButton(self, values=["Dark", "Light"], 
                                            command=self.cambiar_tema)
         self.tema.pack(pady=10)
@@ -27,7 +29,8 @@ class VentanaOpciones(ctk.CTkFrame):
         ctk.CTkCheckBox(self, text="Pantalla Completa", variable=self.full_var,
                         command=self.toggle_full).pack(pady=20)
 
-        ctk.CTkButton(self, text="⬅️ VOLVER", command=self.al_volver).pack(pady=20)
+        ctk.CTkButton(self, text="⬅️ VOLVER", fg_color=COLORS["panel_alt"], hover_color="#253041",
+                  command=self.al_volver).pack(pady=20)
 
     def toggle_full(self):
         ventana = self.winfo_toplevel()
