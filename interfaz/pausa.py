@@ -38,4 +38,4 @@ class MenuPausa(ctk.CTkFrame):
         self.juego.limpiar_pantalla()
         from interfaz.opciones import VentanaOpciones
         # Al volver de opciones, queremos que abra el menú de pausa de nuevo
-        VentanaOpciones(self.juego.root, al_volver=self.juego.abrir_pausa)
+        VentanaOpciones(self.juego.root, al_volver=self.juego.abrir_pausa, db=self.juego.db)

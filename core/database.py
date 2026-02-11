@@ -26,6 +26,12 @@ class Database:
                 updated_at TEXT NOT NULL
             )
             """)
+            cur.execute("""
+            CREATE TABLE IF NOT EXISTS config (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+            """)
             conn.commit()
 
     def hay_partidas_guardadas(self) -> bool:
@@ -90,6 +96,21 @@ class Database:
                 "nivel": data.get("nivel", 1),
                 "updated_at": row[2]
             }
+
+    def set_config(self, key: str, value: str):
+        with self._conn() as conn:
+            cur = conn.cursor()
+            cur.execute("REPLACE INTO config(key, value) VALUES (?, ?)", (key, value))
+            conn.commit()
+
+    def get_config(self, key: str, default: str | None = None):
+        with self._conn() as conn:
+            cur = conn.cursor()
+            cur.execute("SELECT value FROM config WHERE key = ?", (key,))
+            row = cur.fetchone()
+            if not row:
+                return default
+            return row[0]
 
     def obtener_partida(self, slot: int):
         """

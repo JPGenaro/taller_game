@@ -18,6 +18,9 @@ class Aplicacion:
         # 2. Inicialización de Núcleo (Core)
         self.db = Database()
         self.motor = Motor()
+
+        # Aplicar configuración persistida (tema, fullscreen)
+        self.aplicar_configuracion()
         
         # 3. Estado de la sesión actual
         self.slot_actual = None
@@ -203,11 +206,25 @@ class Aplicacion:
     def mostrar_opciones(self):
         """Pantalla de ajustes técnicos."""
         self.limpiar_pantalla()
-        VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio)
+        VentanaOpciones(self.root, al_volver=self.mostrar_menu_inicio, db=self.db)
 
     def abrir_mercado(self):
         """Abre la ventana de compra de autos."""
         VentanaMercado(self.root, self.motor, self.mostrar_taller)
+
+    def aplicar_configuracion(self):
+        tema = self.db.get_config("tema", "Dark")
+        try:
+            ctk.set_appearance_mode(tema)
+        except Exception:
+            ctk.set_appearance_mode("Dark")
+
+        fullscreen = self.db.get_config("fullscreen", "false")
+        modo_full = str(fullscreen).lower() == "true"
+        try:
+            self.root.attributes("-fullscreen", modo_full)
+        except Exception:
+            pass
 
     def guardar_partida(self, slot: int | None = None, parent_window=None):
         """
