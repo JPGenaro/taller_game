@@ -4,11 +4,15 @@ import os
 from core.config import ConfigManager
 
 class Auto:
-    def __init__(self, marca, modelo, precio_compra, partes=None, km=None):
+    def __init__(self, marca, modelo, precio_compra, partes=None, km=None, anio=None):
         self.marca = marca
         self.modelo = modelo
         self.precio_compra = precio_compra
+        # Kilometraje
         self.km = km if km is not None else random.randint(20000, 250000)
+        # Año de producción (si no se provee, elegir aleatorio entre 1990 y 2019)
+        import datetime
+        self.anio = anio if anio is not None else random.randint(1990, min(2019, datetime.datetime.now().year))
 
         # Estado detallado
         self.partes = partes or {
@@ -35,6 +39,7 @@ class Auto:
             "modelo": self.modelo,
             "precio_compra": self.precio_compra,
             "km": self.km,
+            "anio": self.anio,
             "partes": self.partes
         }
 
@@ -47,7 +52,8 @@ class Auto:
             data.get("modelo", "X"),
             data.get("precio_compra", 0),
             partes=data.get("partes"),
-            km=data.get("km")
+            km=data.get("km"),
+            anio=data.get("anio")
         )
 
     def promedio_estado(self) -> float:
@@ -65,7 +71,21 @@ class Auto:
         base = self.precio_compra
         # factor base según estado, desde 0.6 (muy malo) hasta 1.4 (muy bueno)
         base_factor = 0.6 + 0.8 * estado
-        valor = int(base * base_factor * km_multiplier)
+
+        # Factor por año de producción: autos más nuevos valen más.
+        try:
+            import datetime as _dt
+            current = _dt.datetime.now().year
+            age = max(0, current - int(self.anio))
+            # cada año reduce ~2% del multiplicador con límite
+            year_factor = max(0.6, 1.0 - 0.02 * age)
+            # convertir a multiplicador donde autos nuevos (anio reciente) conservan ~1.0
+            # y autos viejos bajan hasta 0.6; invertimos para que año más nuevo aumente
+            year_multiplier = 1.0 / year_factor
+        except Exception:
+            year_multiplier = 1.0
+
+        valor = int(base * base_factor * km_multiplier * year_multiplier)
         return max(0, valor)
 
     def market_price(self) -> int:
@@ -79,6 +99,16 @@ class Auto:
         base = self.precio_compra
         # markup según estado
         price = base * (0.8 + 0.7 * estado) * km_penalty
+
+        # aplicar influencia del año (autos recientes incrementan el precio de mercado)
+        try:
+            import datetime as _dt
+            current = _dt.datetime.now().year
+            age = max(0, current - int(self.anio))
+            year_adj = max(0.7, 1.0 - 0.015 * age)  # penaliza ligeramente por antigüedad
+            price = price * year_adj
+        except Exception:
+            pass
         # mercado aplica markup y algo de variación
         factor = random.uniform(0.9, 1.25)
         final = int(max(1, price * factor))
@@ -97,5 +127,10 @@ class Auto:
         with open(ruta_csv, mode='r', encoding='utf-8') as f:
             lector = csv.DictReader(f)
             for fila in lector:
-                modelos.append((fila['marca'], fila['modelo'], int(fila['precio_base'])))
+                try:
+                    anio = int(fila.get('anio') or 0) if 'anio' in fila else None
+                except Exception:
+                    anio = None
+                precio = int(fila.get('precio_base') or fila.get('precio', 0)) if ('precio_base' in fila or 'precio' in fila) else 0
+                modelos.append((fila['marca'], fila['modelo'], precio, anio))
         return modelos

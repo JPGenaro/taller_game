@@ -15,6 +15,11 @@ class Aplicacion:
         self.root = ctk.CTk()
         self.root.title("Garage Tycoon v0.3")
         self.root.geometry("1000x700")
+        # Forzar pantalla completa por defecto
+        try:
+            self.root.attributes("-fullscreen", True)
+        except Exception:
+            pass
         self.root.configure(fg_color=COLORS["bg"])
         
         # 2. Inicialización de Núcleo (Core)

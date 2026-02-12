@@ -33,13 +33,17 @@ class SlotTaller(ctk.CTkFrame):
         # Ventana unificada de detalles del auto
         ventana = ctk.CTkToplevel(self)
         ventana.title(f"Diagnóstico: {self.auto_actual.marca} {self.auto_actual.modelo}")
-        ventana.geometry("460x620")
+        # Abrir en fullscreen para mantener consistencia
+        try:
+            ventana.attributes("-fullscreen", True)
+        except Exception:
+            ventana.geometry("460x620")
         ventana.configure(fg_color=COLORS["bg"])
         ventana.after(10, ventana.lift)
 
         ctk.CTkLabel(ventana, text="ESTADO DE COMPONENTES", font=FONTS["subtitle"], text_color=COLORS["text"]).pack(pady=(16, 6))
 
-        info = ctk.CTkLabel(ventana, text=f"KM: {self.auto_actual.km}  |  Valor venta: ${self.auto_actual.valor_venta()}", font=FONTS["small"], text_color=COLORS["muted"])
+        info = ctk.CTkLabel(ventana, text=f"KM: {self.auto_actual.km}  |  Año: {getattr(self.auto_actual, 'anio', 'N/A')}  |  Valor venta: ${self.auto_actual.valor_venta()}", font=FONTS["small"], text_color=COLORS["muted"])
         info.pack(pady=(0, 6))
 
         scroll = ctk.CTkScrollableFrame(ventana, fg_color=COLORS["panel"], height=380)

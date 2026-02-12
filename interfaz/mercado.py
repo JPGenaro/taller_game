@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import random
+import os
 from modelos.auto import Auto
 from tkinter import messagebox
 from core.ui_theme import COLORS, FONTS
@@ -23,7 +24,11 @@ class VentanaMercado(ctk.CTkToplevel):
             self._icon_small = None
 
         self.title("Mercado de Autos Usados")
-        self.geometry("760x460")
+        # abrir en fullscreen por defecto
+        try:
+            self.attributes("-fullscreen", True)
+        except Exception:
+            self.geometry("760x460")
         self.configure(fg_color=COLORS["bg"])
         self.after(10, self.lift) # Truco para que la ventana aparezca al frente en Linux
 
@@ -40,9 +45,15 @@ class VentanaMercado(ctk.CTkToplevel):
         # Generar más ofertas y precios dinámicos basados en estado y km
         ofertas_elegidas = random.choices(pool_modelos, k=min(5, max(3, len(pool_modelos))))
 
-        for marca, modelo, precio_base in ofertas_elegidas:
-            # crear auto con estado aleatorio y km aleatorio
-            auto_oferta = Auto(marca, modelo, precio_base)
+        for entry in ofertas_elegidas:
+            # entry puede ser (marca, modelo, precio, anio) o (marca, modelo, precio)
+            if len(entry) >= 4:
+                marca, modelo, precio_base, anio = entry[0], entry[1], entry[2], entry[3]
+            else:
+                marca, modelo, precio_base = entry[0], entry[1], entry[2]
+                anio = None
+            # crear auto con estado aleatorio y km aleatorio, y año si está
+            auto_oferta = Auto(marca, modelo, precio_base, anio=anio)
             # calcular precio de mercado dinámico
             precio_mercado = auto_oferta.market_price()
             # Actualizar precio_compra al precio real que el jugador debe pagar
@@ -55,6 +66,7 @@ class VentanaMercado(ctk.CTkToplevel):
             ctk.CTkLabel(frame_oferta, text=f"Precio: ${precio_mercado}", text_color=COLORS["accent_2"], font=FONTS["body"]).pack()
             ctk.CTkLabel(frame_oferta, text=f"KM: {auto_oferta.km}", text_color=COLORS["muted"], font=FONTS["small"]).pack()
             ctk.CTkLabel(frame_oferta, text=f"Estado promedio: {int(auto_oferta.promedio_estado())}%", text_color=COLORS["muted"], font=FONTS["small"]).pack()
+            ctk.CTkLabel(frame_oferta, text=f"Año: {getattr(auto_oferta, 'anio', 'Desconocido')}", text_color=COLORS["muted"], font=FONTS["small"]).pack()
             ctk.CTkLabel(frame_oferta, text=f"Valor venta (si lo vendés): ${auto_oferta.valor_venta()}", text_color=COLORS["text"], font=FONTS["small"]).pack(pady=(0, 6))
 
             # usar icono si está disponible
