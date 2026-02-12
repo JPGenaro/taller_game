@@ -114,11 +114,13 @@ class Motor:
         return xp_actual, xp_req, xp_faltante, porcentaje
 
     def costo_reparacion_total(self, auto) -> int:
-        # Costo por punto faltante (balanceado)
-        costo_por_punto = 2
+        # Costo por punto faltante (balanceado) - valores en core.config
+        from core.config import REPAIR_COST_PER_POINT, REPAIR_COST_CAP_MULTIPLIER
+        costo_por_punto = float(REPAIR_COST_PER_POINT)
         faltante = sum(100 - v for v in auto.partes.values())
-        # Topar a 120% del precio de compra
-        return min(int(max(0, faltante) * costo_por_punto), int(auto.precio_compra * 1.2))
+        # Topar respecto al precio de compra mediante multiplicador
+        cap = float(REPAIR_COST_CAP_MULTIPLIER)
+        return min(int(max(0, faltante) * costo_por_punto), int(auto.precio_compra * cap))
 
     def reparar_auto_total(self, slot_index: int):
         if slot_index < 0 or slot_index >= len(self.slots):
@@ -138,9 +140,9 @@ class Motor:
             auto.partes[parte] = 100
         self.dinero -= costo
 
-        # Dar EXP: generoso para acelerar progresión (ajustable)
+        # Dar EXP: configurable (ver core.config.DEFAULTS)
         from core.config import EXP_PER_POINT_DIVISOR
-        exp_ganada = int(puntos_reparados / max(1, EXP_PER_POINT_DIVISOR))
+        exp_ganada = int(puntos_reparados / max(1, int(EXP_PER_POINT_DIVISOR)))
         self.exp += exp_ganada
         self.last_exp_gained = exp_ganada
 
@@ -175,7 +177,7 @@ class Motor:
         precio_base = auto.valor_venta()
         # Aumentar significativamente según nivel del jugador
         from core.config import LEVEL_SELL_MULTIPLIER
-        nivel_mult = 1.0 + LEVEL_SELL_MULTIPLIER * max(0, getattr(self, 'nivel', 1) - 1)
+        nivel_mult = 1.0 + float(LEVEL_SELL_MULTIPLIER) * max(0, getattr(self, 'nivel', 1) - 1)
         precio = int(precio_base * nivel_mult)
         self.dinero += precio
         self.slots[slot_index] = None

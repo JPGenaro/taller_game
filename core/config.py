@@ -22,6 +22,42 @@ class ConfigManager:
         else:
             ventana.attributes("-fullscreen", False)
 
-# Game balance constants
-EXP_PER_POINT_DIVISOR = 2      # puntos_reparados / EXP_PER_POINT_DIVISOR -> EXP gained
-LEVEL_SELL_MULTIPLIER = 0.20   # extra multiplier per level (20% per level above 1)
+# Game balance defaults (can be overridden and persisted at runtime)
+DEFAULTS = {
+    "EXP_PER_POINT_DIVISOR": 2,      # puntos_reparados / EXP_PER_POINT_DIVISOR -> EXP gained
+    "LEVEL_SELL_MULTIPLIER": 0.20,   # extra multiplier per level (20% per level above 1)
+    "REPAIR_COST_PER_POINT": 2,      # costo por punto de reparación
+    "REPAIR_COST_CAP_MULTIPLIER": 1.2 # tope respecto al precio de compra (1.2 = 120%)
+}
+
+# Initialize module-level constants from defaults so other modules can import them
+EXP_PER_POINT_DIVISOR = DEFAULTS["EXP_PER_POINT_DIVISOR"]
+LEVEL_SELL_MULTIPLIER = DEFAULTS["LEVEL_SELL_MULTIPLIER"]
+REPAIR_COST_PER_POINT = DEFAULTS["REPAIR_COST_PER_POINT"]
+REPAIR_COST_CAP_MULTIPLIER = DEFAULTS["REPAIR_COST_CAP_MULTIPLIER"]
+
+def apply_runtime_override(key: str, value):
+    """Apply a runtime override to the module constant and return the applied value.
+    Key should be one of DEFAULTS keys.
+    """
+    global EXP_PER_POINT_DIVISOR, LEVEL_SELL_MULTIPLIER, REPAIR_COST_PER_POINT, REPAIR_COST_CAP_MULTIPLIER
+    if key not in DEFAULTS:
+        raise KeyError(f"Unknown config key: {key}")
+    # coerce types based on default type
+    default = DEFAULTS[key]
+    if isinstance(default, int):
+        v = int(value)
+    else:
+        v = float(value)
+    if key == "EXP_PER_POINT_DIVISOR":
+        EXP_PER_POINT_DIVISOR = v
+    elif key == "LEVEL_SELL_MULTIPLIER":
+        LEVEL_SELL_MULTIPLIER = v
+    elif key == "REPAIR_COST_PER_POINT":
+        REPAIR_COST_PER_POINT = v
+    elif key == "REPAIR_COST_CAP_MULTIPLIER":
+        REPAIR_COST_CAP_MULTIPLIER = v
+    return v
+
+def get_default(key: str):
+    return DEFAULTS.get(key)

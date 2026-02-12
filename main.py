@@ -186,6 +186,62 @@ class Aplicacion:
         barra_xp.set(porcentaje)
         barra_xp.pack(side="right", padx=12)
 
+        # Mostrar banner de subida de nivel si corresponde (transitorio)
+        try:
+            if getattr(self.motor, 'last_levels_gained', 0) > 0 or getattr(self.motor, 'last_exp_gained', 0) > 0:
+                niveles = getattr(self.motor, 'last_levels_gained', 0)
+                exp_g = getattr(self.motor, 'last_exp_gained', 0)
+                texto = f"¡Ganaste {exp_g} XP!"
+                if niveles:
+                    texto += f"  ¡Subiste {niveles} nivel(es)!"
+
+                # pequeño Toplevel sin decoraciones
+                banner = ctk.CTkToplevel(self.root)
+                try:
+                    banner.overrideredirect(True)
+                except Exception:
+                    pass
+                banner.attributes("-topmost", True)
+                lbl = ctk.CTkLabel(banner, text=texto, font=("Arial Bold", 18), text_color=COLORS["accent_2"], fg_color=COLORS["panel"], corner_radius=8)
+                lbl.pack(ipadx=20, ipady=10)
+
+                # centrar banner en la parte superior
+                self.root.update_idletasks()
+                w = banner.winfo_reqwidth()
+                h = banner.winfo_reqheight()
+                sw = self.root.winfo_width()
+                x = self.root.winfo_x() + max(0, (sw - w) // 2)
+                y = self.root.winfo_y() + 20
+                try:
+                    banner.geometry(f"+{x}+{y}")
+                except Exception:
+                    pass
+
+                # reproducir sonido de notificación si está disponible
+                try:
+                    from core.sound_manager import get_sound_manager
+                    sm = get_sound_manager()
+                    sm.play("sound_buy.wav")
+                except Exception:
+                    pass
+
+                # limpiar transientes después de mostrar
+                def _cerrar_banner():
+                    try:
+                        banner.destroy()
+                    except Exception:
+                        pass
+                    # resetear valores
+                    try:
+                        self.motor.last_exp_gained = 0
+                        self.motor.last_levels_gained = 0
+                    except Exception:
+                        pass
+
+                banner.after(2600, _cerrar_banner)
+        except Exception:
+            pass
+
         # --- ZONA DE TRABAJO (Elevadores) ---
         zona_elevadores = ctk.CTkFrame(self.root, fg_color="transparent")
         zona_elevadores.pack(expand=True, fill="both", padx=20, pady=10)
