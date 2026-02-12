@@ -56,13 +56,33 @@ class Auto:
         return sum(self.partes.values()) / len(self.partes)
 
     def valor_venta(self) -> int:
+        # Valor cuando el jugador vende el auto al mercado
         # Estado promedio (0..1)
         estado = self.promedio_estado() / 100.0
-        # Factor por kilometraje (degrada hasta 40%)
-        km_factor = max(0.6, 1 - (self.km / 400000))
+        # Factor por kilometraje: autos con menos km valen más (bonus hasta +0.5)
+        km_discount = max(0, (100000 - self.km) / 200000.0)  # 0..0.5
+        km_multiplier = 1.0 + km_discount
         base = self.precio_compra
-        # Nunca vender por menos del 60% del precio base ajustado por km
-        return max(0, int(base * max(0.6, (0.6 + 0.4 * estado)) * km_factor))
+        # factor base según estado, desde 0.6 (muy malo) hasta 1.4 (muy bueno)
+        base_factor = 0.6 + 0.8 * estado
+        valor = int(base * base_factor * km_multiplier)
+        return max(0, valor)
+
+    def market_price(self) -> int:
+        """Precio al que el mercado oferta este auto al jugador (venta del mercado).
+        Este precio es mayor que el valor de venta al mercado y tiene un pequeño markup y variación.
+        """
+        import random
+        estado = self.promedio_estado() / 100.0
+        # km penaliza el precio de venta del mercado ligeramente
+        km_penalty = max(0.5, 1 - (self.km / 400000.0))
+        base = self.precio_compra
+        # markup según estado
+        price = base * (0.8 + 0.7 * estado) * km_penalty
+        # mercado aplica markup y algo de variación
+        factor = random.uniform(0.9, 1.25)
+        final = int(max(1, price * factor))
+        return final
 
     @staticmethod
     def cargar_modelos_desde_csv():

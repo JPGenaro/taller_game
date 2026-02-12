@@ -21,3 +21,7 @@ class ConfigManager:
             ventana.attributes("-fullscreen", True)
         else:
             ventana.attributes("-fullscreen", False)
+
+# Game balance constants
+EXP_PER_POINT_DIVISOR = 2      # puntos_reparados / EXP_PER_POINT_DIVISOR -> EXP gained
+LEVEL_SELL_MULTIPLIER = 0.20   # extra multiplier per level (20% per level above 1)

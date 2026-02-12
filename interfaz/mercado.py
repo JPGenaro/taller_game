@@ -37,21 +37,25 @@ class VentanaMercado(ctk.CTkToplevel):
 
     def generar_ofertas(self):
         pool_modelos = Auto.cargar_modelos_desde_csv()
-        
-        # Elegimos 3 al azar de la lista del CSV
-        ofertas_elegidas = random.sample(pool_modelos, k=min(3, len(pool_modelos)))
+        # Generar más ofertas y precios dinámicos basados en estado y km
+        ofertas_elegidas = random.choices(pool_modelos, k=min(5, max(3, len(pool_modelos))))
 
         for marca, modelo, precio_base in ofertas_elegidas:
+            # crear auto con estado aleatorio y km aleatorio
             auto_oferta = Auto(marca, modelo, precio_base)
-            
+            # calcular precio de mercado dinámico
+            precio_mercado = auto_oferta.market_price()
+            # Actualizar precio_compra al precio real que el jugador debe pagar
+            auto_oferta.precio_compra = precio_mercado
+
             frame_oferta = ctk.CTkFrame(self.contenedor_autos, fg_color=COLORS["card"], corner_radius=12)
             frame_oferta.pack(side="left", expand=True, fill="both", padx=10, pady=10)
-            
+
             ctk.CTkLabel(frame_oferta, text=f"{marca}\n{modelo}", font=FONTS["subtitle"], text_color=COLORS["text"]).pack(pady=(14, 8))
-            ctk.CTkLabel(frame_oferta, text=f"Precio: ${precio_base}", text_color=COLORS["accent_2"], font=FONTS["body"]).pack()
+            ctk.CTkLabel(frame_oferta, text=f"Precio: ${precio_mercado}", text_color=COLORS["accent_2"], font=FONTS["body"]).pack()
             ctk.CTkLabel(frame_oferta, text=f"KM: {auto_oferta.km}", text_color=COLORS["muted"], font=FONTS["small"]).pack()
-            ctk.CTkLabel(frame_oferta, text=f"Motor: {auto_oferta.partes['Motor']}%", text_color=COLORS["muted"], font=FONTS["small"]).pack()
-            ctk.CTkLabel(frame_oferta, text=f"Valor venta: ${auto_oferta.valor_venta()}", text_color=COLORS["text"], font=FONTS["small"]).pack(pady=(0, 6))
+            ctk.CTkLabel(frame_oferta, text=f"Estado promedio: {int(auto_oferta.promedio_estado())}%", text_color=COLORS["muted"], font=FONTS["small"]).pack()
+            ctk.CTkLabel(frame_oferta, text=f"Valor venta (si lo vendés): ${auto_oferta.valor_venta()}", text_color=COLORS["text"], font=FONTS["small"]).pack(pady=(0, 6))
 
             # usar icono si está disponible
             btn_kwargs = {"fg_color": COLORS["accent"], "hover_color": "#2563eb", "command": lambda a=auto_oferta: self._comprar_con_efecto(a)}

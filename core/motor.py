@@ -10,6 +10,9 @@ class Motor:
         self.exp = 0
         self.slots = [None, None, None] # Lista para los autos en el taller
         self.historial = []
+        # transient values for UI
+        self.last_exp_gained = 0
+        self.last_levels_gained = 0
 
     def cargar_datos(self, datos):
         """
@@ -128,11 +131,39 @@ class Motor:
         if self.dinero < costo:
             return False, f"Dinero insuficiente. Necesitas ${costo}."
 
+        # calcular puntos reparados para dar EXP
+        puntos_reparados = sum(100 - v for v in auto.partes.values())
+
         for parte in auto.partes:
             auto.partes[parte] = 100
         self.dinero -= costo
-        self.historial.append(f"Reparación total: {auto.marca} {auto.modelo} por ${costo}")
-        return True, f"Auto reparado por ${costo}."
+
+        # Dar EXP: generoso para acelerar progresión (ajustable)
+        from core.config import EXP_PER_POINT_DIVISOR
+        exp_ganada = int(puntos_reparados / max(1, EXP_PER_POINT_DIVISOR))
+        self.exp += exp_ganada
+        self.last_exp_gained = exp_ganada
+
+        # comprobar subidas de nivel
+        niveles_subidos = 0
+        info_niveles = []
+        while True:
+            req = self.xp_para_siguiente()
+            if self.exp >= req:
+                self.exp -= req
+                self.nivel += 1
+                niveles_subidos += 1
+                info_niveles.append(f"Subiste al nivel {self.nivel}!")
+            else:
+                break
+        self.last_levels_gained = niveles_subidos
+
+        msg = f"Auto reparado por ${costo}. EXP ganada: {exp_ganada}."
+        if niveles_subidos:
+            msg += " " + " ".join(info_niveles)
+
+        self.historial.append(f"Reparación total: {auto.marca} {auto.modelo} por ${costo} (EXP +{exp_ganada})")
+        return True, msg
 
     def vender_auto(self, slot_index: int):
         if slot_index < 0 or slot_index >= len(self.slots):
@@ -141,11 +172,15 @@ class Motor:
         if not auto:
             return False, "No hay auto en ese slot."
 
-        precio = auto.valor_venta()
+        precio_base = auto.valor_venta()
+        # Aumentar significativamente según nivel del jugador
+        from core.config import LEVEL_SELL_MULTIPLIER
+        nivel_mult = 1.0 + LEVEL_SELL_MULTIPLIER * max(0, getattr(self, 'nivel', 1) - 1)
+        precio = int(precio_base * nivel_mult)
         self.dinero += precio
         self.slots[slot_index] = None
-        self.historial.append(f"Venta: {auto.marca} {auto.modelo} por ${precio}")
-        return True, f"Auto vendido por ${precio}."
+        self.historial.append(f"Venta: {auto.marca} {auto.modelo} por ${precio} (base ${precio_base})")
+        return True, f"Auto vendido por ${precio}. (base ${precio_base}, nivel x{nivel_mult:.2f})"
 
     # Serialización para guardar/cargar
     def to_dict(self) -> dict:
