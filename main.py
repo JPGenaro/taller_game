@@ -13,7 +13,7 @@ class Aplicacion:
     def __init__(self):
         # 1. Configuración de Ventana
         self.root = ctk.CTk()
-        self.root.title("Garage Tycoon v0.3")
+        self.root.title("Garage Tycoon v0.3.1")
         self.root.geometry("1000x700")
         # Forzar pantalla completa por defecto
         try:
@@ -29,6 +29,12 @@ class Aplicacion:
         # Aplicar configuración persistida (tema, fullscreen)
         apply_theme(self.root)
         self.aplicar_configuracion()
+        # Forzar fullscreen al iniciar para evitar inconsistencias del WM
+        try:
+            self.root.update_idletasks()
+            self.root.attributes("-fullscreen", True)
+        except Exception:
+            pass
         
         # 3. Estado de la sesión actual
         self.slot_actual = None
@@ -296,7 +302,8 @@ class Aplicacion:
         except Exception:
             ctk.set_appearance_mode("Dark")
 
-        fullscreen = self.db.get_config("fullscreen", "false")
+        # Respect persisted fullscreen setting; default to true for a fullscreen experience
+        fullscreen = self.db.get_config("fullscreen", "true")
         modo_full = str(fullscreen).lower() == "true"
         try:
             self.root.attributes("-fullscreen", modo_full)
@@ -345,10 +352,13 @@ class Aplicacion:
             # Mostrar el messagebox con un small delay para asegurar el foco y orden de ventanas
             def _show_ok():
                 try:
-                    messagebox.showinfo("Guardar partida", f"Partida guardada en el slot {slot_to_use}.", parent=self.root)
+                    from core.ui_helpers import show_message
+                    show_message(self.root, "Guardar partida", f"Partida guardada en el slot {slot_to_use}.", kind="success", duration=2.5)
                 except Exception:
-                    # fallback sin parent
-                    messagebox.showinfo("Guardar partida", f"Partida guardada en el slot {slot_to_use}.")
+                    try:
+                        messagebox.showinfo("Guardar partida", f"Partida guardada en el slot {slot_to_use}.", parent=self.root)
+                    except Exception:
+                        messagebox.showinfo("Guardar partida", f"Partida guardada en el slot {slot_to_use}.")
 
             self.root.after(120, _show_ok)
             return True
@@ -362,9 +372,13 @@ class Aplicacion:
 
             def _show_err():
                 try:
-                    messagebox.showerror("Error al guardar", f"No se pudo guardar la partida:\n{e}", parent=self.root)
+                    from core.ui_helpers import show_message
+                    show_message(self.root, "Error al guardar", f"No se pudo guardar la partida:\n{e}", kind="error", duration=None)
                 except Exception:
-                    messagebox.showerror("Error al guardar", f"No se pudo guardar la partida:\n{e}")
+                    try:
+                        messagebox.showerror("Error al guardar", f"No se pudo guardar la partida:\n{e}", parent=self.root)
+                    except Exception:
+                        messagebox.showerror("Error al guardar", f"No se pudo guardar la partida:\n{e}")
             self.root.after(120, _show_err)
             return False
 

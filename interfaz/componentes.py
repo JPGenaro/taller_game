@@ -34,10 +34,26 @@ class SlotTaller(ctk.CTkFrame):
         ventana = ctk.CTkToplevel(self)
         ventana.title(f"Diagnóstico: {self.auto_actual.marca} {self.auto_actual.modelo}")
         # Abrir en fullscreen para mantener consistencia
+        # modal y fullscreen para mantener contexto
         try:
+            parent = self.winfo_toplevel()
+            ventana.transient(parent)
+        except Exception:
+            pass
+        try:
+            ventana.update_idletasks()
             ventana.attributes("-fullscreen", True)
         except Exception:
-            ventana.geometry("460x620")
+            try:
+                ventana.state('zoomed')
+            except Exception:
+                ventana.geometry("460x620")
+        try:
+            ventana.lift()
+            ventana.focus_force()
+            ventana.grab_set()
+        except Exception:
+            pass
         ventana.configure(fg_color=COLORS["bg"])
         ventana.after(10, ventana.lift)
 
@@ -77,26 +93,44 @@ class SlotTaller(ctk.CTkFrame):
                       command=lambda: self._vender_auto(ventana)).pack(side="left", padx=8)
 
         ctk.CTkButton(ventana, text="CERRAR", fg_color=COLORS["panel_alt"], hover_color="#253041",
-                  command=ventana.destroy).pack(pady=(0, 12))
+                  command=lambda: (ventana.grab_release() if hasattr(ventana, 'grab_release') else None, ventana.destroy())).pack(pady=(0, 12))
 
     def _reparar_total(self, ventana):
         if self.juego is None or self.slot_index is None:
             return
         ok, msg = self.juego.motor.reparar_auto_total(self.slot_index)
-        if ok:
-            messagebox.showinfo("Reparación", msg, parent=ventana)
-            self.juego.mostrar_taller()
-            ventana.destroy()
-        else:
-            messagebox.showerror("Reparación", msg, parent=ventana)
+        try:
+            from core.ui_helpers import show_message
+            if ok:
+                show_message(self.juego.root or ventana, "Reparación", msg, kind="success", duration=2.5)
+                self.juego.mostrar_taller()
+                ventana.destroy()
+            else:
+                show_message(self.juego.root or ventana, "Reparación", msg, kind="error", duration=None)
+        except Exception:
+            if ok:
+                messagebox.showinfo("Reparación", msg, parent=ventana)
+                self.juego.mostrar_taller()
+                ventana.destroy()
+            else:
+                messagebox.showerror("Reparación", msg, parent=ventana)
 
     def _vender_auto(self, ventana):
         if self.juego is None or self.slot_index is None:
             return
         ok, msg = self.juego.motor.vender_auto(self.slot_index)
-        if ok:
-            messagebox.showinfo("Venta", msg, parent=ventana)
-            self.juego.mostrar_taller()
-            ventana.destroy()
-        else:
-            messagebox.showerror("Venta", msg, parent=ventana)
+        try:
+            from core.ui_helpers import show_message
+            if ok:
+                show_message(self.juego.root or ventana, "Venta", msg, kind="success", duration=2.8)
+                self.juego.mostrar_taller()
+                ventana.destroy()
+            else:
+                show_message(self.juego.root or ventana, "Venta", msg, kind="error", duration=None)
+        except Exception:
+            if ok:
+                messagebox.showinfo("Venta", msg, parent=ventana)
+                self.juego.mostrar_taller()
+                ventana.destroy()
+            else:
+                messagebox.showerror("Venta", msg, parent=ventana)

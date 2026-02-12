@@ -30,6 +30,12 @@ DEFAULTS = {
     "REPAIR_COST_CAP_MULTIPLIER": 1.2 # tope respecto al precio de compra (1.2 = 120%)
 }
 
+# Year-related pricing defaults
+DEFAULTS.update({
+    "YEAR_DEPRECIATION": 0.02,   # pérdida de valor por año (por defecto 2% por año)
+    "YEAR_MIN_FACTOR": 0.6       # factor mínimo de degradación (no bajar de 0.6)
+})
+
 # Initialize module-level constants from defaults so other modules can import them
 EXP_PER_POINT_DIVISOR = DEFAULTS["EXP_PER_POINT_DIVISOR"]
 LEVEL_SELL_MULTIPLIER = DEFAULTS["LEVEL_SELL_MULTIPLIER"]
@@ -57,6 +63,10 @@ def apply_runtime_override(key: str, value):
         REPAIR_COST_PER_POINT = v
     elif key == "REPAIR_COST_CAP_MULTIPLIER":
         REPAIR_COST_CAP_MULTIPLIER = v
+    elif key == "YEAR_DEPRECIATION":
+        YEAR_DEPRECIATION = v
+    elif key == "YEAR_MIN_FACTOR":
+        YEAR_MIN_FACTOR = v
     return v
 
 def get_default(key: str):

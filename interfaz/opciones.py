@@ -137,10 +137,14 @@ class VentanaOpciones(ctk.CTkFrame):
 
         # feedback
         try:
-            from tkinter import messagebox
-            messagebox.showinfo("Opciones", "Balance actualizado.")
+            from core.ui_helpers import show_message
+            show_message(self.winfo_toplevel(), "Opciones", "Balance actualizado.", kind="success", duration=1.8)
         except Exception:
-            pass
+            try:
+                from tkinter import messagebox
+                messagebox.showinfo("Opciones", "Balance actualizado.")
+            except Exception:
+                pass
 
     def _on_volume_change(self, v):
         if self.db:

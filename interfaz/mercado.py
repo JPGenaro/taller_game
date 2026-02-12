@@ -24,11 +24,27 @@ class VentanaMercado(ctk.CTkToplevel):
             self._icon_small = None
 
         self.title("Mercado de Autos Usados")
-        # abrir en fullscreen por defecto
+        # abrir en fullscreen por defecto y ser transiente/modal
         try:
+            self.transient(master)
+        except Exception:
+            pass
+        try:
+            self.update_idletasks()
             self.attributes("-fullscreen", True)
         except Exception:
-            self.geometry("760x460")
+            try:
+                # algunos WMs aceptan 'zoomed' o state('zoomed')
+                self.state('zoomed')
+            except Exception:
+                self.geometry("760x460")
+        try:
+            self.lift()
+            self.focus_force()
+            # modalizar para mantener contexto
+            self.grab_set()
+        except Exception:
+            pass
         self.configure(fg_color=COLORS["bg"])
         self.after(10, self.lift) # Truco para que la ventana aparezca al frente en Linux
 
@@ -86,11 +102,29 @@ class VentanaMercado(ctk.CTkToplevel):
                 self.sound.play("sound_buy.wav")
             except Exception:
                 pass
-            messagebox.showinfo("Compra exitosa", mensaje, parent=self)
+            try:
+                from core.ui_helpers import show_message
+                show_message(self, "Compra exitosa", mensaje, kind="success", duration=2.6)
+            except Exception:
+                try:
+                    messagebox.showinfo("Compra exitosa", mensaje, parent=self)
+                except Exception:
+                    pass
             self.callback_actualizar()
+            try:
+                self.grab_release()
+            except Exception:
+                pass
             self.destroy()
         else:
-            messagebox.showerror("Compra fallida", mensaje, parent=self)
+            try:
+                from core.ui_helpers import show_message
+                show_message(self, "Compra fallida", mensaje, kind="error", duration=None)
+            except Exception:
+                try:
+                    messagebox.showerror("Compra fallida", mensaje, parent=self)
+                except Exception:
+                    pass
 
     def _comprar_con_efecto(self, auto):
         # pequeña envoltura para intentar reproducir sonido antes/after
